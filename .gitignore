@@ -4,4 +4,6 @@
 !.dev.vars.example
 .env*
 !.env.example
-uploads/fotos/
+uploads/
+Frota/exemplosimg
+Frota/designer
