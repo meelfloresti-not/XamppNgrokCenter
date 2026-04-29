@@ -5,5 +5,5 @@
 .env*
 !.env.example
 uploads/
-Frota/exemplosimg
-Frota/designer
+Frota/exemplosimg/
+Frota/designer/
