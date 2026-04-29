@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarta Parada - Formulário de Fechamento</title>
+    <meta name="description" content="Formulário de fechamento diário - Relatório de vendas e estoque">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="qpf2style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">📋</div>
+            <h1>Quarta Parada - Formulário de Fechamento</h1>
+            <p>Relatório diário de vendas e estoque</p>
+        </div>
+
+        <!-- Config Banner -->
+        <!-- <div class="config-banner" id="configBanner" onclick="openConfigModal()">
+            <span class="icon">⚙️</span>
+            <span class="text" id="configText">Clique aqui para configurar a URL do Google Apps Script</span>
+            <span class="arrow">→</span>
+        </div> -->
+
+        <form id="formFechamento" autocomplete="off">
+
+            <!-- 1. Informações Gerais -->
+            <details class="section section--info" open>
+                <summary class="section-header">
+                    <div class="section-icon">📊</div>
+                    <div>
+                        <div class="section-title">Informações Gerais</div>
+                        <div class="section-subtitle">Dados do dia e do agente</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--2">
+                        <div class="form-group">
+                            <label for="data">Data</label>
+                            <input type="date" id="data" name="data" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="agente">Agente</label>
+                            <input type="text" id="agente" name="agente" placeholder="Nome do agente" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="velorios">Quantidade de Velórios
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="velorios" name="velorios" min="0" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sepultamento_direto">Sepultamento Direto
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="sepultamento_direto" name="sepultamento_direto" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="masculinos">Masculinos
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="masculinos" name="masculinos" min="0" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="femininos">Femininos
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="femininos" name="femininos" min="0" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="total_compras">Total de Pessoas que Comprou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="total_compras" name="total_compras" min="0" placeholder="0"
+                                required>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 2. Coroas -->
+            <details class="section section--coroas">
+                <summary class="section-header">
+                    <div class="section-icon">💐</div>
+                    <div>
+                        <div class="section-title">Coroas</div>
+                        <div class="section-subtitle">Controle de coroas do dia</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--3">
+                        <div class="form-group">
+                            <label for="coroas_iniciou">Iniciou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_iniciou" name="coroas_iniciou" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_reposicao">Reposição
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_reposicao" name="coroas_reposicao" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_vendidas">Vendidas
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_vendidas" name="coroas_vendidas" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_retirar">Retirar
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_retirar" name="coroas_retirar" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_descartadas">Descartadas
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_descartadas" name="coroas_descartadas" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_saiu_consolare">Saiu p/ Consolare
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_saiu_consolare" name="coroas_saiu_consolare" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="coroas_saiu_anjo_luz">Saiu p/ Anjo Luz
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="coroas_saiu_anjo_luz" name="coroas_saiu_anjo_luz" min="0"
+                                placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 3. Vasos -->
+            <details class="section section--vasos">
+                <summary class="section-header">
+                    <div class="section-icon">🏺</div>
+                    <div>
+                        <div class="section-title">Vasos</div>
+                        <div class="section-subtitle">Estoque e movimentação de vasos</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--3">
+                        <div class="form-group">
+                            <label for="vasos_brancos_iniciou">Vasos Brancos Iniciou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="vasos_brancos_iniciou" name="vasos_brancos_iniciou" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vasos_coloridos_iniciou">Vasos Coloridos Iniciou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="vasos_coloridos_iniciou" name="vasos_coloridos_iniciou" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vasos_vendidos_loja">Vasos Vendidos na Loja
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="vasos_vendidos_loja" name="vasos_vendidos_loja" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vasos_brancos_finalizou">Vasos Brancos Finalizou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="vasos_brancos_finalizou" name="vasos_brancos_finalizou" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vasos_coloridos_finalizou">Vasos Coloridos Finalizou
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="vasos_coloridos_finalizou" name="vasos_coloridos_finalizou" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vasos_finalizou_total">Vasos Finalizou (Total)
+                                <span class="hint">Calculado/Verificado</span>
+                            </label>
+                            <input type="number" id="vasos_finalizou_total" name="vasos_finalizou_total" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="descarte_vasos">Descarte Vasos (Und)
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="descarte_vasos" name="descarte_vasos" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="descarte_vasos_cores">Quais cores (Descarte)
+                                <span class="hint">Ex: 1 branco, 2 azuis</span>
+                            </label>
+                            <input type="text" id="descarte_vasos_cores" name="descarte_vasos_cores"
+                                placeholder="Descreva as cores">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 4. Rosas -->
+            <details class="section section--rosas">
+                <summary class="section-header">
+                    <div class="section-icon">🌹</div>
+                    <div>
+                        <div class="section-title">Rosas</div>
+                        <div class="section-subtitle">Fardos, pacotes e unidades</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--3">
+                        <!-- Brancas -->
+                        <div class="form-group">
+                            <label for="rosas_brancas_iniciou">Pacotes Brancas INICIOU</label>
+                            <input type="number" id="rosas_brancas_iniciou" name="rosas_brancas_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_brancas_finalizou">Pacotes Brancas FINALIZOU</label>
+                            <input type="number" id="rosas_brancas_finalizou" name="rosas_brancas_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <!-- Amarelas -->
+                        <div class="form-group">
+                            <label for="rosas_amarelas_iniciou">Pacotes Amarelas INICIOU</label>
+                            <input type="number" id="rosas_amarelas_iniciou" name="rosas_amarelas_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_amarelas_finalizou">Pacotes Amarelas FINALIZOU</label>
+                            <input type="number" id="rosas_amarelas_finalizou" name="rosas_amarelas_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <!-- Vermelhas -->
+                        <div class="form-group">
+                            <label for="rosas_vermelhas_iniciou">Pacotes Vermelhas INICIOU</label>
+                            <input type="number" id="rosas_vermelhas_iniciou" name="rosas_vermelhas_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_vermelhas_finalizou">Pacotes Vermelhas FINALIZOU</label>
+                            <input type="number" id="rosas_vermelhas_finalizou" name="rosas_vermelhas_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <!-- Cor de Rosa -->
+                        <div class="form-group">
+                            <label for="rosas_rosa_iniciou">Pacotes Cor-de-rosa INICIOU</label>
+                            <input type="number" id="rosas_rosa_iniciou" name="rosas_rosa_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_rosa_finalizou">Pacotes Cor-de-rosa FINALIZOU</label>
+                            <input type="number" id="rosas_rosa_finalizou" name="rosas_rosa_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <!-- Champanhe -->
+                        <div class="form-group">
+                            <label for="rosas_champanhe_iniciou">Pacotes Champanhe INICIOU</label>
+                            <input type="number" id="rosas_champanhe_iniciou" name="rosas_champanhe_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_champanhe_finalizou">Pacotes Champanhe FINALIZOU</label>
+                            <input type="number" id="rosas_champanhe_finalizou" name="rosas_champanhe_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <!-- Mistas -->
+                        <div class="form-group">
+                            <label for="rosas_mistas_iniciou">Pacotes Mistas INICIOU</label>
+                            <input type="number" id="rosas_mistas_iniciou" name="rosas_mistas_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_mistas_finalizou">Pacotes Mistas FINALIZOU</label>
+                            <input type="number" id="rosas_mistas_finalizou" name="rosas_mistas_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+
+                        <div class="form-group form-group--full"
+                            style="border-top:1px solid rgba(255,255,255,0.06); padding-top:12px; margin-top:8px;">
+                        </div>
+
+                        <!-- Gerais Rosas -->
+                        <div class="form-group">
+                            <label for="rosas_vendidas_loja">Rosas vendidas na loja</label>
+                            <input type="number" id="rosas_vendidas_loja" name="rosas_vendidas_loja" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_expositor_inicio">Rosas expositor (Iniciou)</label>
+                            <input type="number" id="rosas_expositor_inicio" name="rosas_expositor_inicio" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_expositor_finalizou">Rosas expositor (Finalizou)</label>
+                            <input type="number" id="rosas_expositor_finalizou" name="rosas_expositor_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_abertas_plantao">Abertas p/ plantão noturno</label>
+                            <input type="number" id="rosas_abertas_plantao" name="rosas_abertas_plantao" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="rosas_pacotes_finalizou_total">Pacotes Finalizou (TOTAL)</label>
+                            <input type="number" id="rosas_pacotes_finalizou_total" name="rosas_pacotes_finalizou_total"
+                                min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="descarte_rosas">Descarte de Rosas (Und)</label>
+                            <input type="number" id="descarte_rosas" name="descarte_rosas" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="descarte_rosas_cores">Quais cores (Descarte)</label>
+                            <input type="text" id="descarte_rosas_cores" name="descarte_rosas_cores"
+                                placeholder="Descreva as cores">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 4.1 Outras Flores -->
+            <details class="section section--rosas">
+                <summary class="section-header">
+                    <div class="section-icon">🌿</div>
+                    <div>
+                        <div class="section-title">Outras Flores</div>
+                        <div class="section-subtitle">Crisântemos, Tango, Gipsofila, Lisiantus</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--3">
+                        <div class="form-group">
+                            <label for="crisantemos_vaso_iniciou">Crisântemos (Vaso) INICIOU</label>
+                            <input type="number" id="crisantemos_vaso_iniciou" name="crisantemos_vaso_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="crisantemos_vaso_finalizou">Crisântemos (Vaso) FINALIZOU</label>
+                            <input type="number" id="crisantemos_vaso_finalizou" name="crisantemos_vaso_finalizou"
+                                min="0" placeholder="0">
+                        </div>
+                        <div></div> <!-- spacer -->
+                        <div class="form-group">
+                            <label for="crisantemos_maco_iniciou">Crisântemos (Maço) INICIOU</label>
+                            <input type="number" id="crisantemos_maco_iniciou" name="crisantemos_maco_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="crisantemos_maco_finalizou">Crisântemos (Maço) FINALIZOU</label>
+                            <input type="number" id="crisantemos_maco_finalizou" name="crisantemos_maco_finalizou"
+                                min="0" placeholder="0">
+                        </div>
+                        <div></div> <!-- spacer -->
+                        <div class="form-group">
+                            <label for="tango_iniciou">Tango INICIOU</label>
+                            <input type="number" id="tango_iniciou" name="tango_iniciou" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="tango_finalizou">Tango FINALIZOU</label>
+                            <input type="number" id="tango_finalizou" name="tango_finalizou" min="0" placeholder="0">
+                        </div>
+                        <div></div>
+                        <div class="form-group">
+                            <label for="gipsofila_iniciou">Gipsofila INICIOU</label>
+                            <input type="number" id="gipsofila_iniciou" name="gipsofila_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="gipsofila_finalizou">Gipsofila FINALIZOU</label>
+                            <input type="number" id="gipsofila_finalizou" name="gipsofila_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div></div>
+                        <div class="form-group">
+                            <label for="lisiantus_iniciou">Lisiantus INICIOU (Caixa)</label>
+                            <input type="number" id="lisiantus_iniciou" name="lisiantus_iniciou" min="0"
+                                placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="lisiantus_finalizou">Lisiantus FINALIZOU (Caixa)</label>
+                            <input type="number" id="lisiantus_finalizou" name="lisiantus_finalizou" min="0"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 4.2 Logística e Material -->
+            <details class="section section--info">
+                <summary class="section-header">
+                    <div class="section-icon">📦</div>
+                    <div>
+                        <div class="section-title">Logística e Entregas</div>
+                        <div class="section-subtitle">Reposições e recebimento</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--2">
+                        <div class="form-group">
+                            <label for="total_reposicao">Ornamentações / Reposições (Total)</label>
+                            <input type="number" id="total_reposicao" name="total_reposicao" min="0" placeholder="0">
+                        </div>
+                        <div></div> <!-- spacer -->
+                        <div class="form-group">
+                            <label for="mat_cooperflora">Recebeu material Cooperflora?</label>
+                            <select id="mat_cooperflora" name="mat_cooperflora">
+                                <option value="">Selecione...</option>
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mat_carlos">Recebeu material Sr. Carlos?</label>
+                            <select id="mat_carlos" name="mat_carlos">
+                                <option value="">Selecione...</option>
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mat_guadalupe">Recebeu material Guadalupe?</label>
+                            <select id="mat_guadalupe" name="mat_guadalupe">
+                                <option value="">Selecione...</option>
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 5. Velas e Plaquinhas -->
+            <details class="section section--velas">
+                <summary class="section-header">
+                    <div class="section-icon">🕯️</div>
+                    <div>
+                        <div class="section-title">Velas e Plaquinhas</div>
+                        <div class="section-subtitle">Vendas e descartes</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--2">
+                        <div class="form-group">
+                            <label for="velas_vendidas">Velas Vendidas
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="velas_vendidas" name="velas_vendidas" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="velas_descartadas">Velas Descartadas
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="velas_descartadas" name="velas_descartadas" min="0" placeholder="0"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plaquinhas_vendidas">Plaquinhas Vendidas
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="plaquinhas_vendidas" name="plaquinhas_vendidas" min="0"
+                                placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plaquinhas_descarte">Plaquinhas Descarte
+                                <span class="hint">Apenas números</span>
+                            </label>
+                            <input type="number" id="plaquinhas_descarte" name="plaquinhas_descarte" min="0"
+                                placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+            </details>
+            <!-- 6. Outros -->
+            <details class="section section--outros">
+                <summary class="section-header">
+                    <div class="section-icon">📝</div>
+                    <div>
+                        <div class="section-title">Outras Informações</div>
+                        <div class="section-subtitle">Terços, observações e fotos</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label for="tercos_vendidos">Terços Vendidos
+                                <span class="hint">Ex: tipo A 99, tipo B 80</span>
+                            </label>
+                            <input type="text" id="tercos_vendidos" name="tercos_vendidos"
+                                placeholder="tipo A 10, tipo B 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="observacoes">Observações</label>
+                            <textarea id="observacoes" name="observacoes"
+                                placeholder="Observações sobre o dia..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Foto Obrigatória do Fechamento</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input type="file" id="foto_relatorio" name="foto_relatorio" accept="image/*" required
+                                    onchange="handleFileUpload(this, 'FFQP')">
+                                <div class="file-upload-icon">📸</div>
+                                <div class="file-upload-text">
+                                    <strong>Clique para selecionar</strong> ou tire uma foto
+                                    <br><span style="font-size:11px; color:var(--text-muted)">A imagem será enviada para
+                                        o seu Google Drive</span>
+                                </div>
+                                <div class="file-preview" id="filePreview">
+                                    <img id="previewImg" src="" alt="Preview">
+                                    <div class="file-name" id="fileName"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+            <!-- 7. Financeiro -->
+            <details class="section section--financeiro">
+                <summary class="section-header">
+                    <div class="section-icon">💰</div>
+                    <div>
+                        <div class="section-title">Financeiro</div>
+                        <div class="section-subtitle">Totais por forma de pagamento</div>
+                    </div>
+                </summary>
+                <div class="section-content">
+                    <div class="form-grid form-grid--2">
+                        <div class="form-group">
+                            <label for="total_debito">Total em Débito
+                                <span class="hint">Números e vírgula — Ex: 1234,98</span>
+                            </label>
+                            <input type="text" id="total_debito" name="total_debito" placeholder="0,00"
+                                inputmode="decimal" pattern="[0-9]*[,]?[0-9]*">
+                        </div>
+                        <div class="form-group">
+                            <label for="total_credito">Total em Crédito
+                                <span class="hint">Números e vírgula — Ex: 1234,98</span>
+                            </label>
+                            <input type="text" id="total_credito" name="total_credito" placeholder="0,00"
+                                inputmode="decimal" pattern="[0-9]*[,]?[0-9]*">
+                        </div>
+                        <div class="form-group">
+                            <label for="total_pix_loja">Total PIX em Loja
+                                <span class="hint">Números e vírgula — Ex: 1234,98</span>
+                            </label>
+                            <input type="text" id="total_pix_loja" name="total_pix_loja" placeholder="0,00"
+                                inputmode="decimal" pattern="[0-9]*[,]?[0-9]*">
+                        </div>
+                        <div class="form-group">
+                            <label for="total_pix_conta">Total PIX em Conta
+                                <span class="hint">Números e vírgula — Ex: 1234,98</span>
+                            </label>
+                            <input type="text" id="total_pix_conta" name="total_pix_conta" placeholder="0,00"
+                                inputmode="decimal" pattern="[0-9]*[,]?[0-9]*">
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="total_dinheiro">Total em Dinheiro
+                                <span class="hint">Números e vírgula — Ex: 1234,98</span>
+                            </label>
+                            <input type="text" id="total_dinheiro" name="total_dinheiro" placeholder="0,00"
+                                inputmode="decimal" pattern="[0-9]*[,]?[0-9]*">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Submit -->
+            <div class="submit-section">
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <span class="btn-text">📤 Enviar Relatório</span>
+                    <span class="spinner"></span>
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Iframe Toggle -->
+        <!-- <div class="iframe-section">
+            <button class="iframe-toggle" id="iframeToggle" onclick="toggleIframe()">
+                <span class="icon">📊</span>
+                <span class="label">Visualizar Planilha</span>
+                <span class="chevron">▼</span>
+            </button>
+            <div class="iframe-container" id="iframeContainer">
+                <iframe
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTePsXXUUQHacbSkAufrnE8FxR05dXhc2ujXpBh9HRYSAONtmkHVL1noM4Nq6-qu-dPW04PSsHo7Fvl/pubhtml?widget=true&amp;headers=false"></iframe>
+            </div>
+        </div> -->
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Config Modal -->
+    <!-- <div class="modal-overlay" id="configModal">
+        <div class="modal">
+            <h2>⚙️ Configurar Google Apps Script</h2>
+            <p>Para enviar os dados do formulário para o Google Sheets, você precisa criar um Google Apps Script. Siga
+                os passos abaixo:</p>
+
+            <div class="steps">
+                <h3>Passo a passo:</h3>
+                <ol>
+                    <li>Abra sua planilha do Google Sheets</li>
+                    <li>Vá em <code>Extensões</code> → <code>Apps Script</code></li>
+                    <li>Apague todo o código existente e cole o código abaixo</li>
+                    <li>Clique em <code>Implantar</code> → <code>Nova implantação</code></li>
+                    <li>Tipo: <code>App da Web</code></li>
+                    <li>Executar como: <code>Eu</code></li>
+                    <li>Quem tem acesso: <code>Qualquer pessoa</code></li>
+                    <li>Clique em <code>Implantar</code> e copie a URL gerada</li>
+                    <li>Cole a URL no campo abaixo</li>
+                </ol>
+            </div>
+
+            <p><strong>Código do Apps Script:</strong></p>
+            <pre>
+function doPost(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    // Identifica qual loja está enviando
+    var nomeAba = "F3"; // Valor padrão
+    if (data.loja === "FFQP") {
+      nomeAba = "FFQP";
+    }
+    
+    // Obtém a aba específica da loja
+    var sheet = ss.getSheetByName(nomeAba);
+    
+    // Se a aba não existir, usa a aba ativa como fallback para não dar erro
+    if (!sheet) {
+      sheet = ss.getActiveSheet();
+    }
+    
+    // Adiciona uma nova linha com os dados
+    sheet.appendRow([
+      data.carimbo,
+      data.data,
+      data.agente,
+      data.velorios,
+      data.sepultamento_direto,
+      data.masculinos,
+      data.femininos,
+      data.total_compras,
+      
+      // Coroas
+      data.coroas_iniciou,
+      data.coroas_reposicao,
+      data.coroas_vendidas,
+      data.coroas_retirar,
+      data.coroas_descartadas,
+      data.coroas_saiu_consolare,
+      data.coroas_saiu_anjo_luz,
+      
+      // Vasos
+      data.vasos_brancos_iniciou,
+      data.vasos_coloridos_iniciou,
+      data.vasos_vendidos_loja,
+      data.vasos_brancos_finalizou,
+      data.vasos_coloridos_finalizou,
+      data.vasos_finalizou_total,
+      data.descarte_vasos,
+      data.descarte_vasos_cores,
+      
+      // Rosas Pacotes
+      data.rosas_brancas_iniciou,
+      data.rosas_brancas_finalizou,
+      data.rosas_amarelas_iniciou,
+      data.rosas_amarelas_finalizou,
+      data.rosas_vermelhas_iniciou,
+      data.rosas_vermelhas_finalizou,
+      data.rosas_rosa_iniciou,
+      data.rosas_rosa_finalizou,
+      data.rosas_champanhe_iniciou,
+      data.rosas_champanhe_finalizou,
+      data.rosas_mistas_iniciou,
+      data.rosas_mistas_finalizou,
+      
+      // Rosas Gerais
+      data.rosas_vendidas_loja,
+      data.rosas_expositor_inicio,
+      data.rosas_expositor_finalizou,
+      data.rosas_abertas_plantao,
+      data.rosas_pacotes_finalizou_total,
+      data.descarte_rosas,
+      data.descarte_rosas_cores,
+      
+      // Outras Flores
+      data.crisantemos_vaso_iniciou,
+      data.crisantemos_vaso_finalizou,
+      data.crisantemos_maco_iniciou,
+      data.crisantemos_maco_finalizou,
+      data.tango_iniciou,
+      data.tango_finalizou,
+      data.gipsofila_iniciou,
+      data.gipsofila_finalizou,
+      data.lisiantus_iniciou,
+      data.lisiantus_finalizou,
+      
+      // Logística
+      data.total_reposicao,
+      data.mat_cooperflora,
+      data.mat_carlos,
+      data.mat_guadalupe,
+      
+      // Gerais / Financeiro
+      data.velas_vendidas,
+      data.velas_descartadas,
+      data.plaquinhas_vendidas,
+      data.plaquinhas_descarte,
+      data.tercos_vendidos,
+      data.observacoes,
+      data.total_debito,
+      data.total_credito,
+      data.total_pix_loja,
+      data.total_pix_conta,
+      data.total_dinheiro,
+      data.foto_maquininhas
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput("O script está funcionando!")
+    .setMimeType(ContentService.MimeType.TEXT);
+}</pre>
+
+            <p>Cole a URL do Apps Script abaixo:</p>
+            <div class="modal-url-input">
+                <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." value="">
+                <button class="btn-save" onclick="saveScriptUrl()">Salvar</button>
+            </div>
+            <button class="btn-close-modal" onclick="closeConfigModal()">Fechar</button>
+        </div>
+    </div> -->
+
+    <script src="js/ui.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/image.js"></script>
+    <script src="js/qpf2-app.js"></script>
+
+</body>
+
+</html>

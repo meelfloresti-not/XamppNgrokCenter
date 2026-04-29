@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEQP</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="cse2style.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <header>
+      <div class="header-inner">
+        <div class="logo">ESTOQUE 4°PARADA</div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('dashboard')">Menu</button>
+          <button class="tab" onclick="switchTab('lancamento')">Lançamento</button>
+          <button class="tab" onclick="switchTab('historico')">Histórico</button>
+          <button class="tab" onclick="switchTab('produtos')">Produtos</button>
+          <button class="tab" onclick="switchTab('ocorrencias')">Ocorrências<span class="tab-badge" id="badgeOcorrencias" style="display:none">0</span></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="pending-badge" id="pendingBadge">⏳ <span id="pendingCount">0</span> pendentes</div>
+          <div class="status-badge" id="statusBadge">
+            <div class="status-dot"></div>
+            <span id="statusText">Verificando...</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard" class="panel active">
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+          <div class="table-wrapper">
+            <div class="table-header">
+              <span class="table-title">📦 Últimas Entradas</span>
+            </div>
+            <div class="overflow-x">
+              <table id="tblEntradas">
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <div class="table-header">
+              <span class="table-title">📤 Últimas Saídas</span>
+            </div>
+            <div class="overflow-x">
+              <table id="tblSaidas">
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANCAMENTO -->
+      <div id="panel-lancamento" class="panel">
+        <div class="form-card">
+          <div class="form-title">Entrada e Saída</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-btn entrada checked" id="rb-entrada">
+                  <input type="radio" name="tipo" value="Entrada" checked onchange="updateRadio()">
+                  ▲ Entrada
+                </label>
+                <label class="radio-btn saida" id="rb-saida">
+                  <input type="radio" name="tipo" value="Saída" onchange="updateRadio()">
+                  ▼ Saída
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Data <span class="required">*</span></label>
+              <input type="datetime-local" id="f-data">
+            </div>
+            <div class="form-group"> <!--Quem cadastrou-->
+              <label>Quem cadastrou <span class="required">*</span></label>
+              <input type="text" id="f-quem" placeholder="Nome do responsável" list="listQuem">
+              <datalist id="listQuem"></datalist>
+            </div>
+            <div class="form-group"> <!--Fornecedor-->
+              <label>Fornecedor</label>
+              <input type="text" id="f-fornecedor" placeholder="Nome do fornecedor" list="listFornecedor">
+              <datalist id="listFornecedor"></datalist>
+            </div>
+            <div class="form-group"> <!--Quem Recebeu-->
+              <label>Quem Recebeu</label>
+              <input type="text" id="f-recebeu" placeholder="Nome de quem recebeu" list="listRecebeu">
+              <datalist id="listRecebeu"></datalist>
+            </div>
+            <div class="form-group"> <!--Local do Estoque-->
+              <label>Local do Estoque <span class="required">*</span></label>
+              <input type="text" id="f-local" placeholder="Ex: Galpão A, Prateleira 3" list="listLocal">
+              <datalist id="listLocal"></datalist>
+            </div>
+            <div class="form-group"> <!--Material-->
+              <label>Material <span class="required">*</span></label>
+              <input type="text" id="f-material" placeholder="Nome do material" list="listMaterial"
+                oninput="autoFillType()">
+              <datalist id="listMaterial"></datalist>
+            </div>
+            <div class="form-group"> <!--Tipo do Material-->
+              <label>Tipo do Material <span class="required">*</span></label>
+              <input type="text" id="f-tipo" placeholder="Ex: Peça, Ferramenta, EPI" list="listTipo">
+              <datalist id="listTipo"></datalist>
+            </div>
+            <div class="form-group"> <!--Modo de Quantidade-->
+              <label>Modo de Quantidade <span class="required">*</span></label>
+              <select id="f-modo-qtd" onchange="toggleModoQtd()">
+                <option value="unidade">Por Unidade Avulsa</option>
+                <option value="pacote">Por Pacote Fechado</option>
+              </select>
+            </div>
+            <div class="form-group" id="group-pacotes" style="display:none"> <!--Qtd. de Pacotes-->
+              <label>Qtd. de Pacotes <span class="required">*</span></label>
+              <input type="number" id="f-pacotes" placeholder="0" min="0" oninput="calcTotalQtd()">
+            </div>
+            <div class="form-group" id="group-unid-pacote" style="display:none"> <!--Unids. por Pacote-->
+              <label>Unids. por Pacote <span class="required">*</span></label>
+              <input type="number" id="f-unid-pacote" placeholder="0" min="0" oninput="calcTotalQtd()">
+            </div>
+            <div class="form-group"> <!--Unidades Totais-->
+              <label>Unidades Totais <span class="required">*</span></label>
+              <input type="number" id="f-qtd" placeholder="0" min="1" oninput="calcUnitario()">
+            </div>
+            <div class="form-group"> <!--Valor Total-->
+              <label>Valor Total (R$)</label>
+              <input type="number" id="f-vtotal" placeholder="0,00" step="0.01" min="0" oninput="calcUnitario()">
+            </div>
+            <div class="form-group"> <!--Valor Unitário-->
+              <label>Valor Unitário (R$) <span
+                  style="font-size:8px;letter-spacing:1px;color:var(--text-muted)">(auto)</span></label>
+              <input type="number" id="f-vunit" placeholder="0,00" step="0.01" min="0" readonly style="opacity:0.7">
+            </div>
+            <div class="form-group"> <!--Observações-->
+              <label>Observações / Quem retirou</label>
+              <input type="text" id="f-obs" placeholder="Notas adicionais...">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px"> <!--Botões de Salvar e Limpar-->
+            <button class="btn btn-primary" id="btnSalvar" onclick="salvarLancamento()"
+              style="position:relative;overflow:hidden">
+              <span class="btn-text">✓ Salvar Lançamento</span>
+              <span class="btn-loader"><span class="spinner-sm"></span> Salvando...</span>
+            </button>
+            <button class="btn" onclick="limparForm()">↺ Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORICO -->
+      <div id="panel-historico" class="panel">
+        <div class="table-wrapper">
+          <div class="table-header">
+            <div style="display:flex; align-items:center; gap: 15px;">
+              <span class="table-title">Histórico de Movimentações</span>
+              <button class="btn btn-clear-filters" onclick="triggerSincronizar()"
+                style="padding: 5px 12px; font-size: 13px;">
+                ⟳ Sincronizar Nuvem
+              </button>
+            </div>
+            <span class="record-count" id="recordCount">0 registros</span>
+          </div>
+          <div class="filters-bar">
+            <div class="filter-group">
+              <span class="filter-label">Busca</span>
+              <input class="filter-input" id="flt-search" placeholder="Material, responsável..."
+                oninput="renderHistorico()">
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Tipo</span>
+              <select class="filter-input" id="flt-tipo" onchange="renderHistorico()">
+                <option value="">Todos</option>
+                <option>Entrada</option>
+                <option>Saída</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Local</span>
+              <select class="filter-input" id="flt-local" onchange="renderHistorico()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Responsável</span>
+              <select class="filter-input" id="flt-quem" onchange="renderHistorico()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Material</span>
+              <select class="filter-input" id="flt-material" onchange="renderHistorico()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Data início</span>
+              <input class="filter-input" type="date" id="flt-dtinicio" oninput="renderHistorico()">
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Data fim</span>
+              <input class="filter-input" type="date" id="flt-dtfim" oninput="renderHistorico()">
+            </div>
+            <button class="btn btn-clear-filters btn" onclick="clearFilters()">✕ Limpar Filtros</button>
+          </div>
+          <div class="overflow-x">
+            <table id="tblHistorico">
+              <thead>
+                <tr>
+                  <th onclick="sortTable('data')">Data <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('tipo')">Tipo <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('quem')">Responsável <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('fornecedor')">Fornecedor <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('quemRecebeu')">Recebeu <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('quemCadastrou')">Cadastrou <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('local')">Local <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('material')">Material <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('tipoMaterial')">Tipo Mat. <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('qtd_pacotes')">Pacotes <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('qtd')">Qtd <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('vunit')">V. Unit. <span class="sort-arrow">↕</span></th>
+                  <th onclick="sortTable('vtotal')">V. Total <span class="sort-arrow">↕</span></th>
+                  <th>Obs.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tblHistoricoBody"></tbody>
+            </table>
+          </div>
+          <div id="emptyHistorico" class="empty-state" style="display:none">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">Nenhum registro encontrado</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUTOS -->
+      <div id="panel-produtos" class="panel">
+        <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="filter-group">
+            <span class="filter-label">Filtrar produto</span>
+            <input class="filter-input" id="flt-produto" placeholder="Buscar produto..." oninput="renderProdutos()"
+              style="min-width:240px">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Tipo</span>
+            <select class="filter-input" id="flt-tipo-prod" onchange="renderProdutos()">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Local</span>
+            <select class="filter-input" id="flt-local-prod" onchange="renderProdutos()">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+        <div id="emptyProdutos" class="empty-state" style="display:none">
+          <div class="empty-icon">📦</div>
+          <div class="empty-text">Nenhum produto encontrado</div>
+        </div>
+      </div>
+
+      <!-- OCORRÊNCIAS -->
+      <div id="panel-ocorrencias" class="panel">
+        <div style="margin-bottom:20px">
+          <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">Ocorrências de Estoque</div>
+          <div style="font-size:13px;color:var(--text-dim)">Produtos que atingiram o nível de alerta configurado. Configure os limites nos cards da aba Produtos ⚙</div>
+        </div>
+        <div id="ocorrenciasContainer"></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Sincronizando...</div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- MODAL CONFIRM -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">Confirmar</div>
+      <div class="modal-text" id="modalText"></div>
+      <div id="deleteReasonGroup" style="display:none;margin-bottom:16px">
+        <label
+          style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;display:block">Motivo
+          da Exclusão <span style="color:var(--amber)">*</span></label>
+        <textarea id="deleteReason" rows="3" placeholder="Informe o motivo da exclusão..."
+          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:var(--font-sans);font-size:14px;padding:10px 12px;outline:none;resize:vertical"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-danger" id="modalConfirmBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BAIXA RÁPIDA -->
+  <div class="modal-overlay" id="modalBaixaRapida">
+    <div class="modal">
+      <div class="modal-title">▼ Baixa Rápida</div>
+      <div class="modal-produto-info">
+        <div id="lblBaixaProduto">—</div>
+        <div class="modal-saldo-info" id="lblBaixaSaldo"></div>
+      </div>
+      <div class="modal-form-group">
+        <label>Quantidade <span class="required">*</span></label>
+        <input type="number" id="inpBaixaQtd" min="1" placeholder="0">
+      </div>
+      <div class="modal-form-group">
+        <label>Motivo <span class="required">*</span></label>
+        <select id="selBaixaMotivo" onchange="toggleMotivoPerdaDescarte()">
+          <option value="Venda">Venda</option>
+          <option value="Consumo interno">Consumo interno</option>
+          <option value="Descarte">Descarte</option>
+          <option value="Perda">Perda</option>
+          <option value="Transferência">Transferência</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="modal-form-group" id="grupoPerdaMotivo" style="display:none">
+        <label>Descreva o motivo <span class="required">*</span></label>
+        <textarea id="inpMotivoPerda" rows="3" placeholder="Descreva o motivo da perda ou descarte..."
+          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:var(--font-sans);font-size:14px;padding:10px 12px;outline:none;resize:vertical"></textarea>
+      </div>
+      <div class="modal-form-group">
+        <label>Quem realizou <span class="required">*</span></label>
+        <input type="text" id="inpBaixaQuem" placeholder="Nome do responsável">
+        <div class="modal-operador-hint">Será lembrado automaticamente nas próximas baixas</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="fecharModalBaixa()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmarBaixaRapida()">▼ Confirmar Baixa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MOVER PRODUTO -->
+  <div class="modal-overlay" id="modalMoverProduto">
+    <div class="modal">
+      <div class="modal-title">↔ Mover para outro Local</div>
+      <div class="modal-produto-info">
+        <div id="lblMoverProduto">—</div>
+        <div class="modal-saldo-info" id="lblMoverSaldo"></div>
+      </div>
+      <div class="modal-form-group">
+        <label>Local de destino <span class="required">*</span></label>
+        <input type="text" id="inpMoverDestino" placeholder="Ex: Galpão B, Prateleira 2" list="listMoverDestino">
+        <datalist id="listMoverDestino"></datalist>
+      </div>
+      <div class="modal-form-group">
+        <label>Quantidade <span class="required">*</span></label>
+        <input type="number" id="inpMoverQtd" min="1" placeholder="0">
+      </div>
+      <div class="modal-form-group">
+        <label>Quem realizou <span class="required">*</span></label>
+        <input type="text" id="inpMoverQuem" placeholder="Nome do responsável">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="fecharModalMover()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarMoverProduto()">↔ Confirmar Movimentação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIG ALERTA -->
+  <div class="modal-overlay" id="modalConfigAlerta">
+    <div class="modal">
+      <div class="modal-title">⚙ Configurar Alerta de Estoque</div>
+      <div class="modal-produto-info">
+        <div id="lblConfigProduto">—</div>
+      </div>
+      <div class="modal-form-group">
+        <label>🟡 Estoque Médio (aviso amarelo)</label>
+        <input type="number" id="inpEstoqueMedio" min="0" placeholder="Ex: 50 unidades">
+      </div>
+      <div class="modal-form-group">
+        <label>🔴 Estoque Mínimo (aviso vermelho)</label>
+        <input type="number" id="inpEstoqueMinimo" min="0" placeholder="Ex: 10 unidades">
+        <div class="modal-operador-hint">O mínimo deve ser menor que o médio. Deixe 0 para desativar.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="fecharModalConfigAlerta()">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarConfigAlerta()">✓ Salvar Configuração</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.APP_CONFIG = {
+      SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzh4ucs8VTvk749bTswvAqZ4L0ATHE8vzI-4CBmmn8ItJ1oKh1hGVWskg0-gj6vvaP3/exec',
+      CACHE_KEY: 'estoque_ceqp_v1',
+      PENDING_KEY: 'estoque_ceqp_pending',
+      ORIGEM: 'CEQP'
+    };
+  </script>
+  <script src="js/ui.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ocorrencias_estoque.js"></script>
+</body>
+
+</html>

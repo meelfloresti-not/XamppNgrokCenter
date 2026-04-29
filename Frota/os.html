@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FROTA • OS</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="frota.css" rel="stylesheet">
+  <script src="js/theme.js"></script>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <header>
+      <div class="header-inner">
+        <div class="logo">FROTA • OS</div>
+        <div class="tabs">
+          <button class="tab tab-btn" data-target="tabCadastrar">Cadastrar</button>
+          <button class="tab tab-btn" data-target="tabDespachar">Despachar</button>
+          <button class="tab tab-btn" data-target="tabOcorrencias">Ocorrências <span id="badgeOcorrencias" style="display:none; background:#ff3b30; color:white; border-radius:12px; padding:2px 6px; font-size:10px; margin-left:6px; font-weight:bold;">0</span></button>
+          <button class="tab tab-btn" data-target="tabRelatorios">Relatórios</button>
+        </div>
+        <div class="header-actions">
+          <button class="btn" id="themeToggle" onclick="toggleTheme()" title="Alternar tema" style="padding:5px 12px;font-size:10px; cursor:pointer;">🌓 Tema</button>
+          <button class="btn" id="btnTestarConexao" style="padding:5px 12px;font-size:10px;">🔌 Conexão</button>
+          <div class="status-badge" id="statusBadge">
+            <div class="status-dot"></div>
+            <span id="statusText">Verificando...</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- Status bar -->
+      <div id="statusBar" class="status-bar"></div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card amber">
+          <div class="stat-label">Pedidos Hoje</div>
+          <div class="stat-value" id="statPedidosHoje">—</div>
+          <div class="stat-sub">cadastrados</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Aguardando Despacho</div>
+          <div class="stat-value" id="statPendentes">—</div>
+          <div class="stat-sub">rascunhos</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Finalizados Hoje</div>
+          <div class="stat-value" id="statFinalizados">—</div>
+          <div class="stat-sub">despachados</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">KM Total Mês</div>
+          <div class="stat-value" id="statKmMes">—</div>
+          <div class="stat-sub">quilômetros</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- APP CONTENT (Renderiza as views de views.js sob demanda)      -->
+      <!-- ============================================================ -->
+      <div id="app-content" class="panel active">
+        <!-- O JS injeta o conteúdo da aba aqui dinamicamente -->
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Carregando...</div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

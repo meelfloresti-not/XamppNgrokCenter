@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FleetControl — Controle de Frota</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="controlstyle.css">
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      ⛽ FleetControl <span>// CONTROLE DE FROTA</span>
+    </div>
+    <nav>
+      <button class="active" onclick="showPage('dashboard')">Dashboard</button>
+      <button onclick="showPage('abastecimento')">Abastecimento</button>
+      <button onclick="showPage('saidas')">Saídas</button>
+      <button onclick="showPage('manutencao')">Manutenção</button>
+      <button onclick="showPage('historico')">Histórico</button>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" onclick="exportExcel()">📥 Exportar Excel</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer">
+        📤 Importar Excel
+        <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
+      </label>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ═══════════════════════════════════ DASHBOARD ═══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="section-title">Dashboard</div>
+      <div class="section-sub">Visão geral da frota — Kangoo & Fiorino</div>
+
+      <!-- FILTER BAR -->
+      <div class="filters">
+        <div class="form-group">
+          <label>De</label>
+          <input type="date" id="dash-from">
+        </div>
+        <div class="form-group">
+          <label>Até</label>
+          <input type="date" id="dash-to">
+        </div>
+        <div class="form-group">
+          <label>Carro</label>
+          <select id="dash-car">
+            <option value="">Todos</option>
+            <option value="Kangoo">Renault Kangoo</option>
+            <option value="Fiorino">Fiat Fiorino</option>
+          </select>
+        </div>
+        <button class="btn btn-sm" onclick="renderDashboard()">Filtrar</button>
+        <button class="btn btn-outline btn-sm" onclick="clearDashFilter()">Limpar</button>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="cards" id="dash-cards"></div>
+
+      <!-- CHARTS ROW -->
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Gasto por mês (R$)</div>
+          <div class="chart-box"><canvas id="chart-monthly"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Litros por mês</div>
+          <div class="chart-box"><canvas id="chart-liters"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Gasto por carro (R$)</div>
+          <div class="chart-box"><canvas id="chart-by-car"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Tipo de combustível</div>
+          <div class="chart-box"><canvas id="chart-fuel-type"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ ABASTECIMENTO ═══ -->
+    <div id="page-abastecimento" class="page">
+      <div class="section-title">Novo Abastecimento</div>
+      <div class="section-sub">Registre um novo abastecimento de combustível</div>
+
+      <div class="panel">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="f-date">
+          </div>
+          <div class="form-group">
+            <label>Hora</label>
+            <input type="time" id="f-time">
+          </div>
+          <div class="form-group">
+            <label>Abastecedor</label>
+            <input type="text" id="f-person" placeholder="Nome do motorista">
+          </div>
+          <div class="form-group">
+            <label>Carro</label>
+            <select id="f-car">
+              <option value="">Selecione...</option>
+              <option value="Kangoo">Renault Kangoo</option>
+              <option value="Fiorino">Fiat Fiorino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tipo de Combustível</label>
+            <select id="f-fuel">
+              <option value="">Selecione...</option>
+              <option value="Gasolina">Gasolina</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Etanol">Etanol</option>
+              <option value="GNV">Gás Natural (GNV)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade (L / m³)</label>
+            <input type="number" id="f-qty" step="0.01" placeholder="Ex: 40.5">
+          </div>
+          <div class="form-group">
+            <label>Valor Total (R$)</label>
+            <input type="number" id="f-value" step="0.01" placeholder="Ex: 250.00">
+          </div>
+          <div class="form-group">
+            <label>KM Inicial</label>
+            <input type="number" id="f-km-start" placeholder="KM ao sair">
+          </div>
+          <div class="form-group">
+            <label>KM Final / Atual</label>
+            <input type="number" id="f-km-end" placeholder="KM ao abastecer">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Observação</label>
+            <input type="text" id="f-obs" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div
+          style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:center;">
+          <div id="f-calc" style="color:var(--text-dim); font-size:12px; flex:1;"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn" onclick="saveAbastecimento()">Salvar Abastecimento</button>
+          <button class="btn btn-outline" onclick="clearForm()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- RECENT TABLE -->
+      <div style="margin-top:24px;">
+        <div class="panel-title" style="margin-bottom:12px;"><span class="dot"></span>Últimos registros</div>
+        <div class="panel" id="recent-table-wrap">
+          <div class="table-wrap">
+            <table id="recent-table">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Motorista</th>
+                  <th>Carro</th>
+                  <th>Combustível</th>
+                  <th>Litros</th>
+                  <th>Valor</th>
+                  <th>KM Saída</th>
+                  <th>KM Abast.</th>
+                  <th>KM Rodado</th>
+                  <th>R$/km</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="recent-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════ SAÍDAS ═══ -->
+    <div id="page-saidas" class="page">
+      <div class="section-title">Gasto por Saída</div>
+      <div class="section-sub">Custo de combustível por período de utilização do veículo</div>
+
+      <div class="filters">
+        <div class="form-group">
+          <label>De</label>
+          <input type="date" id="trip-from">
+        </div>
+        <div class="form-group">
+          <label>Até</label>
+          <input type="date" id="trip-to">
+        </div>
+        <div class="form-group">
+          <label>Carro</label>
+          <select id="trip-car">
+            <option value="">Todos</option>
+            <option value="Kangoo">Renault Kangoo</option>
+            <option value="Fiorino">Fiat Fiorino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Motorista</label>
+          <input type="text" id="trip-person" placeholder="Filtrar por motorista">
+        </div>
+        <button class="btn btn-sm" onclick="renderSaidas()">Filtrar</button>
+        <button class="btn btn-outline btn-sm" onclick="clearSaidasFilter()">Limpar</button>
+      </div>
+
+      <div class="panel" id="saidas-summary" style="margin-bottom:16px; display:none;">
+        <div class="cards" id="saidas-cards"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="dot"></span>Detalhamento por abastecimento</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Carro</th>
+                <th>Motorista</th>
+                <th>Combustível</th>
+                <th>KM Percorrido</th>
+                <th>Litros</th>
+                <th>Gasto (R$)</th>
+                <th>R$/km</th>
+                <th>L/100km</th>
+              </tr>
+            </thead>
+            <tbody id="saidas-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ MANUTENÇÃO ═══ -->
+    <div id="page-manutencao" class="page">
+      <div class="section-title">Manutenção & Desgaste</div>
+      <div class="section-sub">Controle de custos de manutenção e referências de mercado</div>
+
+      <div class="grid2">
+        <!-- FORM -->
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Registrar Manutenção</div>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="m-date">
+            </div>
+            <div class="form-group">
+              <label>Carro</label>
+              <select id="m-car">
+                <option value="">Selecione...</option>
+                <option value="Kangoo">Renault Kangoo</option>
+                <option value="Fiorino">Fiat Fiorino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Categoria</label>
+              <select id="m-cat">
+                <option value="">Selecione...</option>
+                <option value="Pneu">Pneu</option>
+                <option value="Óleo">Troca de Óleo</option>
+                <option value="Mecânica">Mecânica Geral</option>
+                <option value="Freio">Freios</option>
+                <option value="Elétrica">Elétrica</option>
+                <option value="Funilaria">Funilaria/Pintura</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Valor (R$)</label>
+              <input type="number" id="m-value" step="0.01" placeholder="Ex: 350.00">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Descrição</label>
+              <input type="text" id="m-desc" placeholder="Descreva o serviço realizado">
+            </div>
+            <div class="form-group">
+              <label>KM na manutenção</label>
+              <input type="number" id="m-km" placeholder="KM atual">
+            </div>
+            <div class="form-group">
+              <label>Fornecedor</label>
+              <input type="text" id="m-supplier" placeholder="Oficina / Loja">
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn" onclick="saveManutencao()">Salvar Manutenção</button>
+            <button class="btn btn-outline" onclick="clearMaintForm()">Limpar</button>
+          </div>
+        </div>
+
+        <!-- REFERENCES -->
+        <div>
+          <div class="panel" style="margin-bottom:12px;">
+            <div class="panel-title"><span class="dot" style="background:var(--kangoo)"></span>Referências — Renault
+              Kangoo</div>
+            <div class="ref-grid">
+              <div>
+                <div class="ref-item"><span class="ref-label">Pneu (unidade)</span><span class="ref-value">R$
+                    380–520</span></div>
+                <div class="ref-item"><span class="ref-label">Troca de óleo + filtro</span><span class="ref-value">R$
+                    150–220</span></div>
+                <div class="ref-item"><span class="ref-label">Pastilha de freio (eixo)</span><span class="ref-value">R$
+                    180–280</span></div>
+                <div class="ref-item"><span class="ref-label">Revisão básica</span><span class="ref-value">R$
+                    350–600</span></div>
+                <div class="ref-item"><span class="ref-label">Filtro de ar</span><span class="ref-value">R$
+                    60–100</span></div>
+                <div class="ref-item"><span class="ref-label">Embreagem completa</span><span class="ref-value">R$
+                    800–1.400</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><span class="dot" style="background:var(--fiorino)"></span>Referências — Fiat
+              Fiorino</div>
+            <div class="ref-grid">
+              <div>
+                <div class="ref-item"><span class="ref-label">Pneu (unidade)</span><span class="ref-value">R$
+                    300–420</span></div>
+                <div class="ref-item"><span class="ref-label">Troca de óleo + filtro</span><span class="ref-value">R$
+                    120–180</span></div>
+                <div class="ref-item"><span class="ref-label">Pastilha de freio (eixo)</span><span class="ref-value">R$
+                    140–220</span></div>
+                <div class="ref-item"><span class="ref-label">Revisão básica</span><span class="ref-value">R$
+                    280–500</span></div>
+                <div class="ref-item"><span class="ref-label">Filtro de ar</span><span class="ref-value">R$ 40–70</span>
+                </div>
+                <div class="ref-item"><span class="ref-label">Embreagem completa</span><span class="ref-value">R$
+                    600–1.000</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAINTENANCE HISTORY -->
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-title" style="margin-bottom:16px; justify-content:space-between; display:flex;">
+          <span><span class="dot"></span> Histórico de Manutenções</span>
+          <div style="display:flex;gap:8px;">
+            <div id="maint-total-k" style="color:var(--kangoo);font-size:12px;"></div>
+            <div id="maint-total-f" style="color:var(--fiorino);font-size:12px;"></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Carro</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>KM</th>
+                <th>Valor</th>
+                <th>Fornecedor</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="maint-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ HISTÓRICO ═══ -->
+    <div id="page-historico" class="page">
+      <div class="section-title">Histórico Completo</div>
+      <div class="section-sub">Todos os registros de abastecimento e manutenção</div>
+
+      <div class="filters">
+        <div class="form-group">
+          <label>De</label>
+          <input type="date" id="hist-from">
+        </div>
+        <div class="form-group">
+          <label>Até</label>
+          <input type="date" id="hist-to">
+        </div>
+        <div class="form-group">
+          <label>Carro</label>
+          <select id="hist-car">
+            <option value="">Todos</option>
+            <option value="Kangoo">Renault Kangoo</option>
+            <option value="Fiorino">Fiat Fiorino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="hist-type">
+            <option value="">Todos</option>
+            <option value="fuel">Abastecimento</option>
+            <option value="maint">Manutenção</option>
+          </select>
+        </div>
+        <button class="btn btn-sm" onclick="renderHistorico()">Filtrar</button>
+        <button class="btn btn-outline btn-sm" onclick="clearHistFilter()">Limpar</button>
+      </div>
+
+      <div class="cards" id="hist-cards" style="margin-bottom:20px;"></div>
+
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Carro</th>
+                <th>Detalhes</th>
+                <th>KM</th>
+                <th>Valor (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="hist-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <script src="controle-frota.js"></script>
+</body>
+
+</html>

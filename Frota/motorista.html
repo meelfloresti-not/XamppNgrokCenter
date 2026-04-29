@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Motorista - Frota</title>
+    <!-- Substituta livre para o SF Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json?v=2">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Motorista">
+    <meta name="theme-color" content="#000000">
+    <script src="js/theme.js"></script>
+    <style>
+        #themeToggle {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: breatheDark 3s infinite alternate ease-in-out;
+        }
+        :root.theme-light #themeToggle {
+            transform: rotate(180deg);
+            animation: breatheLight 3s infinite alternate ease-in-out;
+        }
+        @keyframes breatheDark {
+            0% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2)); }
+            100% { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); }
+        }
+        @keyframes breatheLight {
+            0% { filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2)); }
+            100% { filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5)); }
+        }
+
+        :root {
+            --bg-color: #000000;
+            --surface-color: #1d1d1f;
+            --surface-2: #272729;
+            --text-main: #ffffff;
+            --text-sec: rgba(255, 255, 255, 0.64);
+            --apple-blue: #0071e3;
+            --apple-blue-active: #0066cc;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #ffcc00;
+        }
+
+        :root.theme-light {
+            --bg-color: #f5f5f7;
+            --surface-color: #ffffff;
+            --surface-2: #e5e5ea;
+            --text-main: #1d1d1f;
+            --text-sec: rgba(0, 0, 0, 0.56);
+            --apple-blue: #0071e3;
+            --apple-blue-active: #0066cc;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #ffcc00;
+        }
+
+        :root.theme-light header {
+            background: rgba(245, 245, 247, 0.85);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
+
+        :root.theme-light .card-id {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        :root.theme-light input[type="text"],
+        :root.theme-light select {
+            border: 1px solid #d2d2d7;
+            background: #ffffff;
+        }
+
+        :root.theme-light .btn-primary {
+            color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            letter-spacing: -0.374px;
+            overscroll-behavior-y: none;
+        }
+
+        /* Nav Header "Glass" */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header h1 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.374px;
+        }
+
+        .container {
+            padding: 24px 16px;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: calc(100vh - 48px);
+        }
+
+        /* View Control */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typography */
+        h2.hero-title {
+            font-size: 40px;
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: -0.28px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.hero-subtitle {
+            font-size: 17px;
+            font-weight: 400;
+            color: var(--text-sec);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: var(--surface-color);
+            border: 2px solid transparent;
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 17px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--apple-blue);
+            background: var(--surface-2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--apple-blue);
+            color: #ffffff;
+        }
+
+        .btn-primary:active {
+            background-color: var(--apple-blue-active);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background-color: var(--surface-color);
+            color: var(--danger);
+            margin-top: 16px;
+        }
+
+        /* File input disguised */
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-id {
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-detail {
+            font-size: 14px;
+            color: var(--text-sec);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--bg-color);
+            padding: 12px 24px;
+            border-radius: 980px;
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--apple-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1 id="headerName">Motorista</h1>
+        <button id="themeToggle" onclick="toggleTheme()"
+            style="position:absolute; right:16px; background:none; border:none; font-size:20px; cursor:pointer;"
+            title="Alternar tema">🌓</button>
+    </header>
+
+    <div class="container">
+        <!-- VISTA DE LOGIN -->
+        <div id="viewLogin" class="view active">
+            <h2 class="hero-title">Acesso<br>Motorista</h2>
+            <p class="hero-subtitle">Informe seu nome ou placa do veículo.</p>
+
+            <div class="form-group">
+                <select id="inputMotorista"
+                    style="width: 100%; background: var(--surface-color); border: 2px solid transparent; color: var(--text-main); padding: 16px; border-radius: 12px; font-size: 17px; outline: none; transition: all 0.2s;">
+                    <option value="">Selecione quem é você...</option>
+                    <option value="Leonardo">Leonardo</option>
+                    <option value="Gilberto">Gilberto</option>
+                    <option value="Fernando">Fernando</option>
+                    <option value="Felipe">Felipe</option>
+                    <option value="Robson">Robson</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="acessarSistema()">Entrar e Buscar Entregas</button>
+        </div>
+
+        <!-- VISTA DE LISTA DE ENTREGAS -->
+        <div id="viewLista" class="view">
+            <h2 class="hero-title" style="font-size: 28px; text-align: left;">Suas Viagens</h2>
+            <p class="hero-subtitle" style="text-align: left;" id="subLista">Buscando pendências...</p>
+
+            <div id="listaEntregas"></div>
+
+            <button class="btn btn-danger" onclick="sair()">Sair (Trocar Motorista)</button>
+        </div>
+
+        <!-- VISTA DE FINALIZAR OS -->
+        <div id="viewFinalizarOS" class="view">
+            <button class="btn btn-danger"
+                style="margin: 0 0 16px 0; background: transparent; padding: 0; text-align: left; color: var(--apple-blue)"
+                onclick="voltarParaLista()">‹ Voltar</button>
+            <h2 class="hero-title" style="font-size: 28px; text-align: left;">Entregar OS</h2>
+            <p class="hero-subtitle" style="text-align: left;" id="subFinalizarOS">ID: ---</p>
+
+            <div class="form-group">
+                <label style="color: var(--text-sec); font-size: 14px; margin-bottom: 8px; display: block;">Quem
+                    recebeu?</label>
+                <input type="text" id="inpQuemRecebeu" placeholder="Ex: Maria (Esposa) Sala J ...">
+            </div>
+
+            <div class="file-upload">
+                <button class="btn btn-primary"
+                    style="background: var(--surface-2); color: var(--text-main); border: 2px solid var(--apple-blue);">📸
+                    Tirar Foto da Entrega</button>
+                <input type="file" id="inpFotoMaterial" accept="image/*" capture="environment"
+                    onchange="previewFotoMaterial()">
+            </div>
+            <p id="lblFotoMaterial"
+                style="font-size: 14px; color: var(--success); text-align: center; margin-bottom: 16px; display: none;">
+                ✅ Foto do material anexada</p>
+
+            <div class="file-upload">
+                <button class="btn btn-primary"
+                    style="background: var(--surface-2); color: var(--text-main); border: 2px solid var(--apple-blue);">📸
+                    Tirar Foto da OS Assinada</button>
+                <input type="file" id="inpFotoOS" accept="image/*" capture="environment" onchange="previewFotoOS()">
+            </div>
+            <p id="lblFotoOS"
+                style="font-size: 14px; color: var(--success); text-align: center; margin-bottom: 24px; display: none;">
+                ✅ Foto da OS anexada</p>
+
+            <button class="btn btn-success" onclick="enviarEntrega()">Confirmar Entrega</button>
+        </div>
+    </div>
+
+    <!-- Modal Navegação Maps/Waze -->
+    <div id="modalNavegacao" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:1500; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+      <div style="background:var(--surface-color); border-radius:16px; padding:24px; max-width:320px; width:90%; text-align:center;">
+        <div style="font-size:17px; font-weight:600; margin-bottom:16px;">Abrir navegação</div>
+        <p id="lblNavEndereco" style="font-size:14px; color:var(--text-sec); margin-bottom:24px; word-break:break-word;"></p>
+        <button class="btn btn-primary" style="margin-bottom:10px;" onclick="navegarCom('maps')">📍 Google Maps</button>
+        <button class="btn btn-primary" style="margin-bottom:10px; background:#33ccff; color:#000;" onclick="navegarCom('waze')">🧭 Waze</button>
+        <button class="btn btn-danger" style="background:transparent; color:var(--text-sec);" onclick="fecharModalNav()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <div style="margin-top: 16px; font-weight: 600; font-size: 14px;">Aguarde...</div>
+    </div>
+
+    <script src="js/motorista_aceite.js"></script>
+</body>
+
+</html>

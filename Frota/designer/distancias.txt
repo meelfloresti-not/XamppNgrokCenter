@@ -1,0 +1,30 @@
+Cemitérios Públicos (Municipais)
+Cemitério	Endereço	Distância (Ida)	Total (Ida e Volta)
+Consolação	Rua da Consolação, 1660	~17,9 km	~35,8 km
+Quarta Parada	Av. Salim Farah Maluf, 3303	~6,1 km	~12,2 km
+Santana (Chora Menino)	Rua Nova dos Portugueses, 141	~17,1 km	~34,2 km
+Tremembé	Av. Maria Amália L. Azevedo, 2930	~19,5 km	~39,0 km
+Vila Mariana	Avenida Lacerda Franco, 2012	~13,3 km	~26,6 km
+Araçá	Avenida Doutor Arnaldo, 666	~20,0 km	~40,0 km
+Dom Bosco (Perus)	Estrada do Pinheirinho, 860	~41,5 km	~83,0 km
+Lapa	Rua Bergson, 347	~28,5 km	~57,0 km
+Santo Amaro	R. Min. Roberto Cardoso Alves, 186	~30,9 km	~61,8 km
+São Paulo	Rua Cardeal Arcoverde, 1217	~21,4 km	~42,8 km
+Vila Nova Cachoeirinha	Av. João Marcelino Branco, s/n	~23,8 km	~47,6 km
+Campo Grande	Av. Nossa Sra. do Sabará, 1371	~26,2 km	~52,4 km
+Lajeado	Estrada do Lajeado Velho, 1490	~18,1 km	~36,2 km
+Penha	Av. Amador Bueno da Veiga, 433	~7,5 km	~15,0 km
+São Luiz	Rua Antônio de Sena, 82	~28,3 km	~56,6 km
+Vila Formosa I e II	Av. Flor de Vila Formosa, s/n	< 1,0 km	< 2,0 km
+Vila Alpina / São Pedro	Avenida Francisco Falconi, 837	~4,9 km	~9,8 km
+Itaquera	Rua Serra de São Domingos, 1597	~13,6 km	~27,2 km
+Parelheiros	Rua Amaro de Pontes, 237	~42,1 km	~84,2 km
+Saudade	Avenida Pires do Rio, 2000	~14,2 km	~28,4 km
+Cemitérios Particulares de Destaque
+Cemitério	Endereço	Distância (Ida)	Total (Ida e Volta)
+Morumbi	Rua Dep. Laércio Corte, 468	~24,5 km	~49,0 km
+Redentor	Avenida Doutor Arnaldo, 1105	~21,2 km	~42,4 km
+Gethsêmani	Praça Ressurreição, 1	~24,8 km	~49,6 km
+Parque dos Ipês	Estr. Velha de Itapecerica, 2947	~29,1 km	~58,2 km
+Carmo	Rua Prof. Horácio A. Alencar, 1	~14,5 km	~29,0 km
+Israelita do Butantã	Av. Eng. Heitor A. E. Garcia, 5530	~28,7 km	~57,4 km

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Fechamento - Formosa</title>
+    <meta name="description" content="Formulário de fechamento diário - Relatório de vendas e estoque">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="f3style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">📋</div>
+            <h1>Formulário de Fechamento Formosa</h1>
+            <p>Relatório diário de vendas e estoque</p>
+        </div>
+
+        <form id="formFechamento" autocomplete="off">
+
+            <!-- 1. Informações Gerais -->
+            <div class="section section--info">
+                <div class="section-header">
+                    <div class="section-icon">📊</div>
+                    <div>
+                        <div class="section-title">Informações Gerais</div>
+                        <div class="section-subtitle">Dados do dia e do agente</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="data_sistema">Data do Sistema
+                            <span class="hint">Preenchido automaticamente</span>
+                        </label>
+                        <input type="text" id="data_sistema" name="data_sistema" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="data">Data</label>
+                        <input type="date" id="data" name="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="agente">Agente</label>
+                        <input type="text" id="agente" name="agente" placeholder="Nome do agente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="velorios">Velórios
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="velorios" name="velorios" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sepultamento_direto">Sepult. Direto
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="sepultamento_direto" name="sepultamento_direto" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="masculinos">Masculinos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="masculinos" name="masculinos" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="femininos">Femininos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="femininos" name="femininos" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="total_compras">Total P/ Compras
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="total_compras" name="total_compras" min="0" placeholder="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Coroas -->
+            <div class="section section--coroas">
+                <div class="section-header">
+                    <div class="section-icon">💐</div>
+                    <div>
+                        <div class="section-title">Coroas</div>
+                        <div class="section-subtitle">Controle de coroas do dia</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--3">
+                    <div class="form-group">
+                        <label for="coroas_iniciou">Iniciou
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_iniciou" name="coroas_iniciou" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_reposicao">Reposição
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_reposicao" name="coroas_reposicao" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_vendidas">Vendidas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_vendidas" name="coroas_vendidas" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_retirar">Retirar
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_retirar" name="coroas_retirar" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_descartadas">Descartadas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_descartadas" name="coroas_descartadas" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_saiu_consolare">Saiu p/ Consolare
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_saiu_consolare" name="coroas_saiu_consolare" min="0"
+                            placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coroas_saiu_anjo_luz">Saiu p/ Anjo Luz
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="coroas_saiu_anjo_luz" name="coroas_saiu_anjo_luz" min="0"
+                            placeholder="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.5 Rosas -->
+            <div class="section section--rosas">
+                <div class="section-header">
+                    <div class="section-icon">🌹</div>
+                    <div>
+                        <div class="section-title">Rosas</div>
+                        <div class="section-subtitle">Estoque e movimentação de rosas</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--3">
+                    <div class="form-group">
+                        <label for="rosas_iniciou">Iniciou com
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="rosas_iniciou" name="rosas_iniciou" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosas_reposicao">Reposição
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="rosas_reposicao" name="rosas_reposicao" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosas_vendidas">Vendidas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="rosas_vendidas" name="rosas_vendidas" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosas_sobras">Sobras
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="rosas_sobras" name="rosas_sobras" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rosas_descartadas">Descartadas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="rosas_descartadas" name="rosas_descartadas" min="0" placeholder="0"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Vasos -->
+            <div class="section section--vasos">
+                <div class="section-header">
+                    <div class="section-icon">🏺</div>
+                    <div>
+                        <div class="section-title">Vasos</div>
+                        <div class="section-subtitle">Estoque e movimentação de vasos</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--3">
+                    <div class="form-group">
+                        <label for="vasos_iniciou">Iniciou com
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_iniciou" name="vasos_iniciou" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_reposicao">Reposição
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_reposicao" name="vasos_reposicao" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_vendidos">Vendidos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_vendidos" name="vasos_vendidos" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_sobras">Sobras
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_sobras" name="vasos_sobras" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_descartados">Descartados
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_descartados" name="vasos_descartados" min="0" placeholder="0"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Vasos Decorados -->
+            <div class="section section--vasos">
+                <div class="section-header">
+                    <div class="section-icon">🎨</div>
+                    <div>
+                        <div class="section-title">Vasos Decorados</div>
+                        <div class="section-subtitle">Estoque e movimentação de vasos decorados</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--3">
+                    <div class="form-group">
+                        <label for="vasos_dec_iniciou">Iniciou com
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_dec_iniciou" name="vasos_dec_iniciou" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_dec_reposicao">Reposição
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_dec_reposicao" name="vasos_dec_reposicao" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_dec_vendidos">Vendidos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_dec_vendidos" name="vasos_dec_vendidos" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_dec_sobras">Sobras
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_dec_sobras" name="vasos_dec_sobras" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vasos_dec_descartados">Descartados
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="vasos_dec_descartados" name="vasos_dec_descartados" min="0"
+                            placeholder="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Velas -->
+            <div class="section section--velas">
+                <div class="section-header">
+                    <div class="section-icon">🕯️</div>
+                    <div>
+                        <div class="section-title">Velas</div>
+                        <div class="section-subtitle">Vendas e descartes de velas</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="velas_vendidas">Vendidas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="velas_vendidas" name="velas_vendidas" min="0" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="velas_descartadas">Descartadas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="velas_descartadas" name="velas_descartadas" min="0" placeholder="0"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Plaquinhas -->
+            <div class="section section--velas">
+                <div class="section-header">
+                    <div class="section-icon">🪧</div>
+                    <div>
+                        <div class="section-title">Plaquinhas</div>
+                        <div class="section-subtitle">Vendas e descartes de plaquinhas</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="plaquinhas_vendidas">Vendidas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="plaquinhas_vendidas" name="plaquinhas_vendidas" min="0" placeholder="0"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plaquinhas_descartadas">Descartadas
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="plaquinhas_descartadas" name="plaquinhas_descartadas" min="0"
+                            placeholder="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Terços Brancos -->
+            <div class="section section--outros">
+                <div class="section-header">
+                    <div class="section-icon">📿</div>
+                    <div>
+                        <div class="section-title">Terços Brancos</div>
+                        <div class="section-subtitle">Vendas e descartes de terços brancos</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="tercos_vendidos">Vendidos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="tercos_vendidos" name="tercos_vendidos" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tercos_descartados">Descartados
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="tercos_descartados" name="tercos_descartados" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Cata-vento -->
+            <div class="section section--outros">
+                <div class="section-header">
+                    <div class="section-icon">🌀</div>
+                    <div>
+                        <div class="section-title">Cata-vento</div>
+                        <div class="section-subtitle">Vendas e descartes de cata-ventos</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="catavento_vendidos">Vendidos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="catavento_vendidos" name="catavento_vendidos" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="catavento_descartados">Descartados
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="catavento_descartados" name="catavento_descartados" min="0"
+                            placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. Lenço Descartável -->
+            <div class="section section--outros">
+                <div class="section-header">
+                    <div class="section-icon">🧻</div>
+                    <div>
+                        <div class="section-title">Lenço Descartável</div>
+                        <div class="section-subtitle">Vendas e descartes de lenços descartáveis</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="lenco_vendidos">Vendidos
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="lenco_vendidos" name="lenco_vendidos" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="lenco_descartados">Descartados
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="lenco_descartados" name="lenco_descartados" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. Observações e Anexos -->
+            <div class="section section--outros">
+                <div class="section-header">
+                    <div class="section-icon">📝</div>
+                    <div>
+                        <div class="section-title">Observações e Anexos</div>
+                        <div class="section-subtitle">Anotações e fotos do fechamento</div>
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-group">
+                        <label for="observacoes">Observações sobre o dia</label>
+                        <textarea id="observacoes" name="observacoes"
+                            placeholder="Observações sobre o dia..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto Obrigatória do Fechamento</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input type="file" id="foto_relatorio" name="foto_relatorio" accept="image/*" required
+                                onchange="handleFileUpload(this, 'F3')">
+                            <div class="file-upload-icon">📸</div>
+                            <div class="file-upload-text">
+                                <strong>Clique para selecionar</strong> ou tire uma foto
+                                <br><span style="font-size:11px; color:var(--text-muted)">A imagem será enviada para o
+                                    seu Google Drive</span>
+                            </div>
+                            <div class="file-preview" id="filePreview">
+                                <img id="previewImg" src="" alt="Preview">
+                                <div class="file-name" id="fileName"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11. Financeiro – Maquininha Diversos -->
+            <div class="section section--financeiro">
+                <div class="section-header">
+                    <div class="section-icon">💳</div>
+                    <div>
+                        <div class="section-title">Financeiro — Maquininha Diversos</div>
+                        <div class="section-subtitle">Totais por forma de pagamento (produtos diversos)</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="debito_diversos">Total Débito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="debito_diversos" name="debito_diversos" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="credito_diversos">Total Crédito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="credito_diversos" name="credito_diversos" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="pix_diversos">Total Pix
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="pix_diversos" name="pix_diversos" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="dinheiro_diversos">Total Dinheiro
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="dinheiro_diversos" name="dinheiro_diversos" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12. Financeiro – Maquininha Coroas -->
+            <div class="section section--financeiro-coroas">
+                <div class="section-header">
+                    <div class="section-icon">💰</div>
+                    <div>
+                        <div class="section-title">Financeiro — Maquininha Coroas</div>
+                        <div class="section-subtitle">Totais por forma de pagamento (coroas)</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="debito_coroas">Total Débito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="debito_coroas" name="debito_coroas" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="credito_coroas">Total Crédito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="credito_coroas" name="credito_coroas" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="pix_coroas">Total Pix
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="pix_coroas" name="pix_coroas" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="dinheiro_coroas">Total Dinheiro
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="dinheiro_coroas" name="dinheiro_coroas" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13. Financeiro – Maquininha Café Diversos -->
+            <div class="section section--financeiro">
+                <div class="section-header">
+                    <div class="section-icon">☕</div>
+                    <div>
+                        <div class="section-title">Financeiro — Maquininha Café Diversos</div>
+                        <div class="section-subtitle">Totais por forma de pagamento (café diversos)</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="debito_cafe">Total Débito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="debito_cafe" name="debito_cafe" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="credito_cafe">Total Crédito
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="credito_cafe" name="credito_cafe" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="pix_cafe">Total Pix
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="pix_cafe" name="pix_cafe" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="dinheiro_cafe">Total Dinheiro
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="dinheiro_cafe" name="dinheiro_cafe" placeholder="0,00"
+                            inputmode="decimal" pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 14. Pagamento por Link -->
+            <div class="section section--link">
+                <div class="section-header">
+                    <div class="section-icon">🔗</div>
+                    <div>
+                        <div class="section-title">Pagamento por Link</div>
+                        <div class="section-subtitle">Quantidade e valor de pagamentos via link</div>
+                    </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label for="link_quantidade">Quantidade de Pagamento por Link
+                            <span class="hint">Apenas números</span>
+                        </label>
+                        <input type="number" id="link_quantidade" name="link_quantidade" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="link_valor">Valor de Pagamento por Link
+                            <span class="hint">Ex: 1234,98</span>
+                        </label>
+                        <input type="text" id="link_valor" name="link_valor" placeholder="0,00" inputmode="decimal"
+                            pattern="[0-9]*[,]?[0-9]*" class="currency-field">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="submit-section">
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <span class="btn-text">📤 Enviar Relatório</span>
+                    <span class="spinner"></span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/image.js"></script>
+    <script src="js/f3-app.js"></script>
+
+</body>
+
+</html>
