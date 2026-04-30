@@ -553,4 +553,164 @@ tbody tr:hover td:not(.sticky-col):not(.total-col) {
     background: var(--scrollbar-thumb-hover);
 }
 
+/* =============================================
+   SHARE / SCREENSHOT STYLES
+   ============================================= */
+
+/* Share Button (Green accent) */
+.btn-share {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-share:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-share:active {
+    transform: scale(0.96) translateY(0);
+}
+
+/* WhatsApp Button */
+.btn-whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+    background: linear-gradient(135deg, #51e88a, #25d366);
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Preview Modal */
+.preview-modal-content {
+    width: 90vw;
+    max-width: 1200px;
+}
+
+.preview-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#preview-image {
+    max-width: 100%;
+    max-height: 55vh;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    object-fit: contain;
+    background: var(--bg-primary);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.preview-actions .btn {
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    z-index: 9998;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+    .app-header,
+    .control-actions,
+    .modal,
+    .loading-overlay,
+    .toast {
+        display: none !important;
+    }
+
+    .app-container {
+        height: auto;
+        overflow: visible;
+    }
+
+    .app-main {
+        padding: 0;
+        overflow: visible;
+    }
+
+    .table-container {
+        overflow: visible;
+        height: auto;
+        box-shadow: none;
+        border: none;
+    }
+
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    th, td {
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        background: #fff !important;
+    }
+
+    .weekend { background: #fee2e2 !important; }
+    .holiday { background: #fef3c7 !important; }
+    .status-x { background: #dbeafe !important; color: #1d4ed8 !important; }
+    .status-f { background: #dcfce7 !important; color: #166534 !important; }
+}
 

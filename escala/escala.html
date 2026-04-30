@@ -34,6 +34,7 @@
                     <div class="control-actions">
                         <button id="theme-toggle" class="btn btn-secondary" onclick="toggleTheme()" title="Alternar Tema"><i class="fa-solid fa-circle-half-stroke"></i></button>
                         <button id="btn-manage-emp" class="btn btn-secondary" title="Gerenciar Funcionários"><i class="fa-solid fa-users"></i> Funcionários</button>
+                        <button id="btn-screenshot" class="btn btn-share" title="Capturar & Compartilhar"><i class="fa-solid fa-camera"></i> Print</button>
                         <button id="btn-export-pdf" class="btn btn-secondary" title="Exportar PDF"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                         <button id="btn-export-excel" class="btn btn-secondary" title="Exportar Excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
                         <button id="btn-clear-data" class="btn btn-danger" title="Limpar dados do mês atual"><i class="fa-solid fa-trash"></i></button>
@@ -99,9 +100,36 @@
         </div>
     </div>
 
+    <!-- Modal Preview de Imagem -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-image"></i> Preview da Escala</h2>
+                <span class="close-modal" id="close-preview-modal">&times;</span>
+            </div>
+            <div class="modal-body preview-body">
+                <img id="preview-image" src="" alt="Preview da escala">
+                <div class="preview-actions">
+                    <button id="btn-download-img" class="btn btn-primary"><i class="fa-solid fa-download"></i> Baixar Imagem</button>
+                    <button id="btn-share-whatsapp" class="btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i> Compartilhar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Capturando imagem...</p>
+        </div>
+    </div>
+
     <!-- Libraries for Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <!-- html2canvas for screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Custom JS -->
     <script src="js/script.js"></script>

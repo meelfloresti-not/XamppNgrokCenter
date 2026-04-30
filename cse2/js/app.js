@@ -16,11 +16,12 @@ let _cardMap = [];         // mapa índice → produto (para onclick)
 let _acaoAtual = null;     // { tipo:'baixa'|'mover'|'config', material, local, saldo }
 
 // ========== INIT ==========
-function init() {
+async function init() {
     if (!window.APP_CONFIG) {
         console.error("APP_CONFIG não foi definido no HTML.");
         return;
     }
+    // Carregar cache local como fallback imediato
     registros = loadCache() || [];
     pendingQueue = loadPendingQueue() || [];
     alertas = loadAlertas() || {};
@@ -30,6 +31,27 @@ function init() {
     renderAll();
     updateOnlineStatus();
     updatePendingBadge();
+
+    // Sincronizar com o servidor PHP local em background
+    try {
+        const [serverData, serverAlertas] = await Promise.all([
+            sincronizarAPI(),
+            carregarAlertasAPI()
+        ]);
+        if (serverData) {
+            registros = serverData;
+            saveCache(registros);
+        }
+        if (serverAlertas && Object.keys(serverAlertas).length > 0) {
+            alertas = serverAlertas;
+            saveAlertas(alertas);
+        }
+        renderAll();
+    } catch(e) {
+        console.warn('Usando cache local (servidor indisponível):', e);
+    }
+
+    // Enviar pendentes
     processPendingQueue();
 }
 
@@ -84,12 +106,20 @@ window.processPendingQueue = async function() {
 };
 
 window.triggerSincronizar = async function() {
-    const d = await sincronizarGAS();
+    const [d, al] = await Promise.all([
+        sincronizarAPI(),
+        carregarAlertasAPI()
+    ]);
     if (d) {
         registros = d;
         saveCache(registros);
-        renderAll();
     }
+    if (al && Object.keys(al).length > 0) {
+        alertas = al;
+        saveAlertas(alertas);
+    }
+    renderAll();
+    showToast('Sincronização completa!', 'success');
 }
 
 
@@ -837,7 +867,7 @@ window.fecharModalConfigAlerta = function() {
     _acaoAtual = null;
 };
 
-window.salvarConfigAlerta = function() {
+window.salvarConfigAlerta = async function() {
     if (!_acaoAtual || _acaoAtual.tipo !== 'config') return;
     const medio = parseFloat(document.getElementById('inpEstoqueMedio').value) || 0;
     const minimo = parseFloat(document.getElementById('inpEstoqueMinimo').value) || 0;
@@ -845,6 +875,8 @@ window.salvarConfigAlerta = function() {
     const aKey = _acaoAtual.material + '|||' + _acaoAtual.local;
     alertas[aKey] = { medio, minimo };
     saveAlertas(alertas);
+    // Salvar no backend também
+    await salvarAlertaAPI(_acaoAtual.material, _acaoAtual.local, medio, minimo);
     fecharModalConfigAlerta();
     renderAll();
     showToast('Alerta configurado!', 'success');

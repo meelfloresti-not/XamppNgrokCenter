@@ -1,31 +1,15 @@
-// Default Employee Data
-const defaultEmployees = [
-    { nome: "Ana Carolina", escala: "6x1" },
-    { nome: "Bruno", escala: "12x36" },
-    { nome: "Davi", escala: "6x1" },
-    { nome: "Gabriela Cipulo", escala: "6x1" },
-    { nome: "Gabriela Humphreys", escala: "6x1" },
-    { nome: "Gilberto", escala: "12x36" },
-    { nome: "Glauce", escala: "6x1" },
-    { nome: "Helena", escala: "6x1" },
-    { nome: "José Fernando", escala: "6x1" },
-    { nome: "Leonardo", escala: "12x36" },
-    { nome: "Luana", escala: "6x1" },
-    { nome: "Mariana", escala: "12x36" },
-    { nome: "Morsa", escala: "12x36" },
-    { nome: "Murillo", escala: "6x1" },
-    { nome: "Pedro Henrique", escala: "12x36" },
-    { nome: "Robson", escala: "5x2" },
-    { nome: "Sabrina", escala: "6x1" },
-    { nome: "Silas", escala: "12x36" },
-    { nome: "Thayssa", escala: "6x1" }
-];
+// =============================================
+// Escala de Funcionários - MySQL Backend
+// =============================================
+// Dados persistidos via API PHP/MySQL
 
-let employees = [];
+const API_BASE = '/escala/api';
 
 // State
-let currentDate = new Date(); // Current selected month
-let stateData = {}; // Format: { "YYYY-MM": { "employeeName_YYYY-MM-DD": "X", "holidays": ["YYYY-MM-DD"] } }
+let employees = [];
+let currentDate = new Date();
+let monthData = {};     // { "nome_YYYY-MM-DD": "X" }
+let holidays = [];      // ["YYYY-MM-DD", ...]
 
 // DOM Elements
 const monthSelector = document.getElementById('month-selector');
@@ -36,6 +20,7 @@ const tableBody = document.getElementById('table-body');
 const btnClear = document.getElementById('btn-clear-data');
 const btnExportPdf = document.getElementById('btn-export-pdf');
 const btnExportExcel = document.getElementById('btn-export-excel');
+const btnScreenshot = document.getElementById('btn-screenshot');
 
 // Modal Elements
 const empModal = document.getElementById('emp-modal');
@@ -46,43 +31,79 @@ const newEmpScale = document.getElementById('new-emp-scale');
 const btnAddEmp = document.getElementById('btn-add-emp');
 const empListBody = document.getElementById('emp-list-body');
 
-// Initialization
-function init() {
-    loadState();
-    
-    // Set initial month selector value to current month
+// Preview Modal Elements
+const previewModal = document.getElementById('preview-modal');
+const closePreviewModal = document.getElementById('close-preview-modal');
+const previewImage = document.getElementById('preview-image');
+const btnDownloadImg = document.getElementById('btn-download-img');
+const btnShareWhatsapp = document.getElementById('btn-share-whatsapp');
+const loadingOverlay = document.getElementById('loading-overlay');
+
+// =============================================
+// INITIALIZATION
+// =============================================
+async function init() {
+    // Set initial month selector value
     const year = currentDate.getFullYear();
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     monthSelector.value = `${year}-${month}`;
-    
+
     setupEventListeners();
+
+    // Load data from MySQL
+    await loadEmployees();
+    await loadMonthData();
     render();
 }
 
-function loadState() {
-    const saved = localStorage.getItem('escala_state');
-    if (saved) {
-        stateData = JSON.parse(saved);
+// =============================================
+// API HELPERS
+// =============================================
+async function apiFetch(endpoint, options = {}) {
+    try {
+        const res = await fetch(`${API_BASE}/${endpoint}`, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options
+        });
+        const json = await res.json();
+        if (!json.success) {
+            console.error(`API Error [${endpoint}]:`, json.error);
+            showToast(json.error || 'Erro na API', 'error');
+            return null;
+        }
+        return json;
+    } catch (err) {
+        console.error(`Network Error [${endpoint}]:`, err);
+        showToast('Erro de conexão com o servidor.', 'error');
+        return null;
     }
-    
-    const savedEmployees = localStorage.getItem('escala_employees');
-    if (savedEmployees) {
-        employees = JSON.parse(savedEmployees);
+}
+
+// =============================================
+// DATA LOADING
+// =============================================
+async function loadEmployees() {
+    const res = await apiFetch('funcionarios.php');
+    if (res) {
+        employees = res.data;
+    }
+}
+
+async function loadMonthData() {
+    const mesKey = getMonthKey(currentDate);
+    const res = await apiFetch(`escala.php?mes=${mesKey}`);
+    if (res) {
+        monthData = res.dados || {};
+        holidays = res.feriados || [];
     } else {
-        employees = [...defaultEmployees];
-        saveEmployees();
+        monthData = {};
+        holidays = [];
     }
 }
 
-function saveState() {
-    localStorage.setItem('escala_state', JSON.stringify(stateData));
-}
-
-function saveEmployees() {
-    employees.sort((a, b) => a.nome.localeCompare(b.nome));
-    localStorage.setItem('escala_employees', JSON.stringify(employees));
-}
-
+// =============================================
+// UTILITY
+// =============================================
 function getMonthKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
@@ -95,32 +116,57 @@ function getDaysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
 }
 
+function showToast(msg, type = 'success') {
+    // Remove existing toasts
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// =============================================
+// EVENT LISTENERS
+// =============================================
 function setupEventListeners() {
-    monthSelector.addEventListener('change', (e) => {
+    monthSelector.addEventListener('change', async (e) => {
         if (e.target.value) {
             const [year, month] = e.target.value.split('-');
             currentDate = new Date(year, parseInt(month) - 1, 1);
+            await loadMonthData();
             render();
         }
     });
 
     scaleFilter.addEventListener('change', render);
 
-    btnClear.addEventListener('click', () => {
+    btnClear.addEventListener('click', async () => {
         if (confirm('Tem certeza que deseja limpar todos os dados DESTE MÊS?')) {
-            const monthKey = getMonthKey(currentDate);
-            if (stateData[monthKey]) {
-                delete stateData[monthKey];
-                saveState();
+            const mesKey = getMonthKey(currentDate);
+            const res = await apiFetch('escala.php', {
+                method: 'DELETE',
+                body: JSON.stringify({ mes: mesKey })
+            });
+            if (res) {
+                monthData = {};
+                holidays = [];
                 render();
+                showToast('Dados do mês limpos com sucesso.');
             }
         }
     });
 
     btnExportPdf.addEventListener('click', exportToPdf);
     btnExportExcel.addEventListener('click', exportToExcel);
-    
-    // Modal Events
+    btnScreenshot.addEventListener('click', captureScreenshot);
+
+    // Employee Modal Events
     btnManageEmp.addEventListener('click', () => {
         renderEmpList();
         empModal.classList.add('show');
@@ -130,114 +176,150 @@ function setupEventListeners() {
         empModal.classList.remove('show');
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === empModal) empModal.classList.remove('show');
+    // Preview Modal Events
+    closePreviewModal.addEventListener('click', () => {
+        previewModal.classList.remove('show');
     });
 
-    btnAddEmp.addEventListener('click', () => {
+    btnDownloadImg.addEventListener('click', downloadScreenshot);
+    btnShareWhatsapp.addEventListener('click', shareWhatsApp);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === empModal) empModal.classList.remove('show');
+        if (e.target === previewModal) previewModal.classList.remove('show');
+    });
+
+    btnAddEmp.addEventListener('click', async () => {
         const name = newEmpName.value.trim();
         const scale = newEmpScale.value;
         if (name) {
-            if (employees.some(emp => emp.nome.toLowerCase() === name.toLowerCase())) {
-                alert('Já existe um funcionário com este nome.');
-                return;
+            const res = await apiFetch('funcionarios.php', {
+                method: 'POST',
+                body: JSON.stringify({ nome: name, escala: scale })
+            });
+            if (res) {
+                newEmpName.value = '';
+                await loadEmployees();
+                renderEmpList();
+                render();
+                showToast(`${name} adicionado com sucesso.`);
             }
-            employees.push({ nome: name, escala: scale });
-            saveEmployees();
-            newEmpName.value = '';
-            renderEmpList();
-            render();
         }
+    });
+
+    // Enter key on employee name input
+    newEmpName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') btnAddEmp.click();
     });
 }
 
+// =============================================
+// EMPLOYEE MANAGEMENT
+// =============================================
 function renderEmpList() {
     empListBody.innerHTML = '';
-    employees.forEach((emp, index) => {
+    employees.forEach((emp) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${emp.nome}</td>
             <td>${emp.escala}</td>
             <td>
-                <button class="btn btn-danger" onclick="deleteEmployee(${index})" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn btn-danger" onclick="deleteEmployee(${emp.id})" title="Excluir"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
         empListBody.appendChild(tr);
     });
 }
 
-function deleteEmployee(index) {
-    if (confirm(`Deseja realmente excluir o funcionário ${employees[index].nome}?`)) {
-        employees.splice(index, 1);
-        saveEmployees();
-        renderEmpList();
+async function deleteEmployee(id) {
+    const emp = employees.find(e => e.id === id);
+    if (!emp) return;
+    if (confirm(`Deseja realmente excluir o funcionário ${emp.nome}?`)) {
+        const res = await apiFetch('funcionarios.php', {
+            method: 'DELETE',
+            body: JSON.stringify({ id })
+        });
+        if (res) {
+            await loadEmployees();
+            renderEmpList();
+            render();
+            showToast(`${emp.nome} removido.`);
+        }
+    }
+}
+
+// =============================================
+// SCHEDULE ACTIONS
+// =============================================
+async function toggleHoliday(dayStr) {
+    const res = await apiFetch('feriados.php', {
+        method: 'POST',
+        body: JSON.stringify({ data: dayStr })
+    });
+    if (res) {
+        if (res.action === 'added') {
+            holidays.push(dayStr);
+        } else {
+            const idx = holidays.indexOf(dayStr);
+            if (idx > -1) holidays.splice(idx, 1);
+        }
         render();
     }
 }
 
-function toggleHoliday(dayStr) {
-    const monthKey = getMonthKey(currentDate);
-    if (!stateData[monthKey]) stateData[monthKey] = { holidays: [] };
-    if (!stateData[monthKey].holidays) stateData[monthKey].holidays = [];
-    
-    const index = stateData[monthKey].holidays.indexOf(dayStr);
-    if (index > -1) {
-        stateData[monthKey].holidays.splice(index, 1);
-    } else {
-        stateData[monthKey].holidays.push(dayStr);
-    }
-    saveState();
-    render();
-}
-
-function cycleCellState(employeeName, dayStr) {
-    const monthKey = getMonthKey(currentDate);
-    if (!stateData[monthKey]) stateData[monthKey] = { holidays: [] };
-    
+async function cycleCellState(employeeId, employeeName, dayStr) {
     const key = `${employeeName}_${dayStr}`;
-    const currentState = stateData[monthKey][key] || '';
-    
+    const currentState = monthData[key] || '';
+
     let nextState = '';
     if (currentState === '') nextState = 'X';
     else if (currentState === 'X') nextState = 'F';
     else if (currentState === 'F') nextState = '';
-    
+
+    // Optimistic update
     if (nextState === '') {
-        delete stateData[monthKey][key];
+        delete monthData[key];
     } else {
-        stateData[monthKey][key] = nextState;
+        monthData[key] = nextState;
     }
-    
-    saveState();
     render();
+
+    // Save to server
+    await apiFetch('escala.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            funcionario_id: employeeId,
+            data_dia: dayStr,
+            status: nextState
+        })
+    });
 }
 
+// =============================================
+// RENDER
+// =============================================
 function render() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const daysInMonth = getDaysInMonth(year, month);
-    const monthKey = getMonthKey(currentDate);
-    const monthData = stateData[monthKey] || { holidays: [] };
-    const holidays = monthData.holidays || [];
     const filter = scaleFilter.value;
 
     // --- Render Headers ---
-    // Reset headers (keep the first 2 columns and last column structure)
     tableHeaderDays.innerHTML = `
         <th rowspan="2" class="sticky-col name-col">Nome do Funcionário</th>
         <th rowspan="2" class="sticky-col scale-col">Escala</th>
     `;
     tableHeaderWeekdays.innerHTML = '';
-    
+
     const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-    
+
     for (let i = 1; i <= daysInMonth; i++) {
         const date = new Date(year, month, i);
         const dayOfWeek = date.getDay();
         const dayStr = getDayString(date);
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const isHoliday = holidays.includes(dayStr);
-        
+
         let headerClass = 'day-col';
         if (isHoliday) headerClass += ' holiday';
         else if (isWeekend) headerClass += ' weekend';
@@ -256,32 +338,32 @@ function render() {
         thDay.textContent = weekdays[dayOfWeek];
         tableHeaderWeekdays.appendChild(thDay);
     }
-    
+
     // Add Total column header
     tableHeaderDays.insertAdjacentHTML('beforeend', `<th rowspan="2" class="total-col">Total<br>Folgas (X)</th>`);
 
     // --- Render Body ---
     tableBody.innerHTML = '';
-    
+
     const filteredEmployees = employees.filter(emp => filter === 'all' || emp.escala === filter);
-    
+
     filteredEmployees.forEach(emp => {
         const tr = document.createElement('tr');
-        
+
         // Name
         const tdName = document.createElement('td');
         tdName.className = 'sticky-col name-col';
         tdName.textContent = emp.nome;
         tr.appendChild(tdName);
-        
+
         // Scale
         const tdScale = document.createElement('td');
         tdScale.className = 'sticky-col scale-col';
         tdScale.textContent = emp.escala;
         tr.appendChild(tdScale);
-        
+
         let totalX = 0;
-        
+
         // Days
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(year, month, i);
@@ -289,36 +371,135 @@ function render() {
             const dayStr = getDayString(date);
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
             const isHoliday = holidays.includes(dayStr);
-            
+
             const cellKey = `${emp.nome}_${dayStr}`;
             const state = monthData[cellKey] || '';
-            
+
             if (state === 'X') totalX++;
-            
+
             const td = document.createElement('td');
             let className = 'cell-day';
             if (state === 'X') className += ' status-x';
             else if (state === 'F') className += ' status-f';
             else if (isHoliday) className += ' holiday';
             else if (isWeekend) className += ' weekend';
-            
+
             td.className = className;
             td.textContent = state;
-            td.onclick = () => cycleCellState(emp.nome, dayStr);
-            
+            td.onclick = () => cycleCellState(emp.id, emp.nome, dayStr);
+
             tr.appendChild(td);
         }
-        
+
         // Total
         const tdTotal = document.createElement('td');
         tdTotal.className = 'total-col';
         tdTotal.textContent = totalX;
         tr.appendChild(tdTotal);
-        
+
         tableBody.appendChild(tr);
     });
 }
 
+// =============================================
+// SCREENSHOT & SHARE
+// =============================================
+let capturedBlob = null;
+
+async function captureScreenshot() {
+    const container = document.getElementById('schedule-container');
+    loadingOverlay.classList.add('show');
+
+    try {
+        // Temporarily expand container to show full table
+        const originalOverflow = container.style.overflow;
+        const originalHeight = container.style.height;
+        const originalMaxHeight = container.style.maxHeight;
+        container.style.overflow = 'visible';
+        container.style.height = 'auto';
+        container.style.maxHeight = 'none';
+
+        const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary').trim() || '#1d1d1f',
+            logging: false,
+            windowWidth: container.scrollWidth,
+            windowHeight: container.scrollHeight
+        });
+
+        // Restore container styles
+        container.style.overflow = originalOverflow;
+        container.style.height = originalHeight;
+        container.style.maxHeight = originalMaxHeight;
+
+        // Convert to blob
+        capturedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        
+        // Show preview
+        previewImage.src = canvas.toDataURL('image/png');
+        loadingOverlay.classList.remove('show');
+        previewModal.classList.add('show');
+
+        // Check if Web Share API is available (mobile)
+        if (navigator.canShare && navigator.canShare({ files: [new File([capturedBlob], 'escala.png', { type: 'image/png' })] })) {
+            btnShareWhatsapp.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Compartilhar';
+        } else {
+            btnShareWhatsapp.innerHTML = '<i class="fa-brands fa-whatsapp"></i> WhatsApp Web';
+        }
+
+    } catch (err) {
+        console.error('Screenshot error:', err);
+        loadingOverlay.classList.remove('show');
+        showToast('Erro ao capturar imagem.', 'error');
+    }
+}
+
+function downloadScreenshot() {
+    if (!capturedBlob) return;
+    const mesKey = getMonthKey(currentDate);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(capturedBlob);
+    link.download = `Escala_${mesKey}.png`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast('Imagem baixada com sucesso!');
+}
+
+async function shareWhatsApp() {
+    if (!capturedBlob) return;
+
+    const mesKey = getMonthKey(currentDate);
+    const file = new File([capturedBlob], `Escala_${mesKey}.png`, { type: 'image/png' });
+
+    // Try native share first (mobile)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                title: `Escala ${mesKey}`,
+                text: `Escala de funcionários - ${mesKey}`,
+                files: [file]
+            });
+            showToast('Compartilhado com sucesso!');
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Share error:', err);
+                showToast('Erro ao compartilhar.', 'error');
+            }
+        }
+    } else {
+        // Desktop fallback: download + open WhatsApp Web
+        downloadScreenshot();
+        showToast('Imagem baixada! Cole no WhatsApp Web.');
+        setTimeout(() => {
+            window.open('https://web.whatsapp.com', '_blank');
+        }, 500);
+    }
+}
+
+// =============================================
+// EXPORT (preserved from original)
+// =============================================
 function exportToPdf() {
     const element = document.getElementById('schedule-container');
     const opt = {
@@ -337,5 +518,7 @@ function exportToExcel() {
     XLSX.writeFile(wb, `Escala_${monthSelector.value}.xlsx`);
 }
 
-// Start
+// =============================================
+// START
+// =============================================
 document.addEventListener('DOMContentLoaded', init);
