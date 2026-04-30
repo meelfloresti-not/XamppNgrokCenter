@@ -1,28 +1,5 @@
-# Implementação do Catálogo de Coroas no PHP
+<?php
 
-Você mencionou que criou uma tabela de valores e quer armazenar as métricas (como preço e tempo de produção) direto no PHP, para que os próximos arquivos HTML se alimentem dela e para que esses dados fiquem no backend, sem interferir no site atual.
-
-## Resumo das Mudanças Propostas
-
-1. **Criar um arquivo de configuração/catálogo no PHP:**
-   Vou criar um novo arquivo `php/catalogo.php` (ou adicionar no topo de `api.php`) que contém um Array associativo (Tabela/Dicionário) de cada coroa disponível, com seu respectivo:
-   - **Valor (`preco`)**
-   - **Tempo de Produção em minutos (`tempo_producao`)**
-
-2. **Enriquecimento automático ao salvar uma OS:**
-   Ao salvar um pedido (`salvarPedido`), o PHP vai interceptar os itens selecionados, buscar no catálogo o valor e o tempo de produção de cada coroa, calcular o total, e injetar isso silenciosamente no banco de dados (`itensJSON` e possivelmente adicionar novas colunas de metadados se necessário). Como os dados serão embutidos por trás dos panos, nada mudará visualmente no site atual.
-
-3. **Novo Endpoint para os próximos HTMLs:**
-   Vou criar uma nova rota na API (`?action=buscarCatalogo`) que retorna toda essa tabela em formato JSON. Assim, seu *próximo HTML* poderá simplesmente puxar esses dados da API sem você precisar duplicar os preços no JavaScript.
-
-## Open Questions (Precisam de revisão)
-
-> [!WARNING]  
-> **Tempos de Produção:**
-> Como eu não tenho a sua tabela de *tempos de produção* exatos, criei estimativas baseadas na complexidade (ex: *Coroa B Simples* = 20 min; *Coroa A Vip* = 120 min). 
-> **Por favor, revise se as estimativas abaixo servem como ponto de partida ou se prefere que eu ajuste algum valor antes de prosseguir:**
-
-```php
 $catalogo_coroas = [
     'Conjunto B Luxo Colorido'      => ['preco' => 1500.00, 'tempo_producao' => 60],
     'Conjunto A Luxo'               => ['preco' => 2970.00, 'tempo_producao' => 90],
@@ -54,7 +31,3 @@ $catalogo_coroas = [
     'Coroa Sidney'                  => ['preco' => 4950.00, 'tempo_producao' => 120],
     'Coroa Havaiana'                => ['preco' => 3850.00, 'tempo_producao' => 120],
 ];
-```
-
-## Próximos Passos
-Se os tempos e preços acima estiverem de acordo (você poderá modificar no código depois se precisar), eu vou proceder com a edição dos arquivos de banco de dados e API. Me dê o **Ok** para prosseguir!

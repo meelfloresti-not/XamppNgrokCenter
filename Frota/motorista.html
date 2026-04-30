@@ -8,7 +8,8 @@
     <!-- Substituta livre para o SF Pro -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json?v=2">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,17 +21,30 @@
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             animation: breatheDark 3s infinite alternate ease-in-out;
         }
+
         :root.theme-light #themeToggle {
             transform: rotate(180deg);
             animation: breatheLight 3s infinite alternate ease-in-out;
         }
+
         @keyframes breatheDark {
-            0% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2)); }
-            100% { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); }
+            0% {
+                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+            }
+
+            100% {
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+            }
         }
+
         @keyframes breatheLight {
-            0% { filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2)); }
-            100% { filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5)); }
+            0% {
+                filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
+            }
+
+            100% {
+                filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
+            }
         }
 
         :root {
@@ -354,11 +368,10 @@
                 <select id="inputMotorista"
                     style="width: 100%; background: var(--surface-color); border: 2px solid transparent; color: var(--text-main); padding: 16px; border-radius: 12px; font-size: 17px; outline: none; transition: all 0.2s;">
                     <option value="">Selecione quem é você...</option>
-                    <option value="Leonardo">Leonardo</option>
-                    <option value="Gilberto">Gilberto</option>
                     <option value="Fernando">Fernando</option>
-                    <option value="Felipe">Felipe</option>
-                    <option value="Robson">Robson</option>
+                    <option value="Gilberto">Gilberto</option>
+                    <option value="Leonardo">Leonardo</option>
+                    <option value="Ronie">Ronie</option>
                 </select>
             </div>
 
@@ -415,14 +428,20 @@
     </div>
 
     <!-- Modal Navegação Maps/Waze -->
-    <div id="modalNavegacao" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:1500; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
-      <div style="background:var(--surface-color); border-radius:16px; padding:24px; max-width:320px; width:90%; text-align:center;">
-        <div style="font-size:17px; font-weight:600; margin-bottom:16px;">Abrir navegação</div>
-        <p id="lblNavEndereco" style="font-size:14px; color:var(--text-sec); margin-bottom:24px; word-break:break-word;"></p>
-        <button class="btn btn-primary" style="margin-bottom:10px;" onclick="navegarCom('maps')">📍 Google Maps</button>
-        <button class="btn btn-primary" style="margin-bottom:10px; background:#33ccff; color:#000;" onclick="navegarCom('waze')">🧭 Waze</button>
-        <button class="btn btn-danger" style="background:transparent; color:var(--text-sec);" onclick="fecharModalNav()">Cancelar</button>
-      </div>
+    <div id="modalNavegacao"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:1500; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+        <div
+            style="background:var(--surface-color); border-radius:16px; padding:24px; max-width:320px; width:90%; text-align:center;">
+            <div style="font-size:17px; font-weight:600; margin-bottom:16px;">Abrir navegação</div>
+            <p id="lblNavEndereco"
+                style="font-size:14px; color:var(--text-sec); margin-bottom:24px; word-break:break-word;"></p>
+            <button class="btn btn-primary" style="margin-bottom:10px;" onclick="navegarCom('maps')">📍 Google
+                Maps</button>
+            <button class="btn btn-primary" style="margin-bottom:10px; background:#33ccff; color:#000;"
+                onclick="navegarCom('waze')">🧭 Waze</button>
+            <button class="btn btn-danger" style="background:transparent; color:var(--text-sec);"
+                onclick="fecharModalNav()">Cancelar</button>
+        </div>
     </div>
 
     <!-- Toast Component -->

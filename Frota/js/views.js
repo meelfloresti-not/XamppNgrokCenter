@@ -187,8 +187,8 @@ export const views = {
               <label>Motorista</label>
               <select id="desp_motorista">
                 <option value="">Selecione...</option>
-                <option>Leonardo</option><option>Gilberto</option><option>Fernando</option>
-                <option>Felipe</option><option>Robson</option>
+                <option>Fernando</option><option>Gilberto</option><option>Leonardo</option>
+                <option>Ronie</option>
               </select>
             </div>
             <div class="form-group">
@@ -273,9 +273,8 @@ export const views = {
           <label>Florista Responsável</label>
           <select id="selFlorista">
             <option value="">Selecione...</option>
-            <option>Ana</option><option>Davi</option><option>Luana</option>
-            <option>Silas</option><option>Murilo</option><option>Gabriele</option>
-            <option>Pedro</option><option>Mara</option><option>Francisco</option>
+            <option>Davi</option><option>Felipe</option><option>Luana</option>
+            <option>Pedro</option>
           </select>
         </div>
         <div class="modal-actions" style="margin-top:20px; display:flex; gap:12px;">

@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once 'db.php';
+require_once 'catalogo.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? null;
@@ -96,7 +97,6 @@ try {
             exit;
         }
 
-        // ✅ Verifica se coroas de determinada loja já foram baixadas hoje
         if ($action === 'buscarOcorrenciasCoroas') {
             $hoje = date('Y-m-d');
             $stmt  = $pdo->prepare("SELECT loja_chave FROM ocorrencias_coroas WHERE data = ?");
@@ -105,19 +105,50 @@ try {
             echo json_encode(["status" => "sucesso", "dados" => $resolvidas]);
             exit;
         }
+
+        if ($action === 'buscarCatalogo') {
+            global $catalogo_coroas;
+            echo json_encode(["status" => "sucesso", "dados" => $catalogo_coroas]);
+            exit;
+        }
     }
 
     if ($method === 'POST') {
         if ($action === 'salvarPedido') {
             $d = $postData['dados'];
             $id = uniqid_short();
-            $itensJSON = json_encode($d['itens']);
+            
+            // Enriquecer os itens e calcular totais
+            $itensEnriquecidos = [];
+            $valorTotal = 0;
+            $tempoProducaoTotal = 0;
+            
+            if (isset($d['itens']) && is_array($d['itens'])) {
+                foreach ($d['itens'] as $item) {
+                    $nomeItem = trim($item['nome'] ?? '');
+                    if (isset($catalogo_coroas[$nomeItem])) {
+                        $item['preco'] = $catalogo_coroas[$nomeItem]['preco'];
+                        $item['tempo_producao'] = $catalogo_coroas[$nomeItem]['tempo_producao'];
+                        
+                        $qtd = isset($item['quantidade']) ? (int)$item['quantidade'] : 1;
+                        $valorTotal += $item['preco'] * $qtd;
+                        $tempoProducaoTotal += $item['tempo_producao'] * $qtd;
+                    } else {
+                        // Valores padrão se não encontrado no catálogo
+                        $item['preco'] = 0;
+                        $item['tempo_producao'] = 0;
+                    }
+                    $itensEnriquecidos[] = $item;
+                }
+            }
+            
+            $itensJSON = json_encode($itensEnriquecidos);
             $frase_coroa = $d['frase_coroa'] ?? '';
             $horaPrazo = $d['hora_entrega'] ?? null;
             
-            $stmt = $pdo->prepare("INSERT INTO pedidos (id, pedido, cliente, falecido, status, data_entrega, hora_prazo, local_entrega, itensJSON, data_manual, frase_coroa) VALUES (?, ?, ?, ?, 'Rascunho', ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO pedidos (id, pedido, cliente, falecido, status, data_entrega, hora_prazo, local_entrega, itensJSON, data_manual, frase_coroa, valor_total, tempo_producao_total) VALUES (?, ?, ?, ?, 'Rascunho', ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $id, $d['pedido'], $d['cliente'], $d['falecido'], $d['data_entrega'], $horaPrazo, $d['local_entrega'], $itensJSON, $d['data_manual'], $frase_coroa
+                $id, $d['pedido'], $d['cliente'], $d['falecido'], $d['data_entrega'], $horaPrazo, $d['local_entrega'], $itensJSON, $d['data_manual'], $frase_coroa, $valorTotal, $tempoProducaoTotal
             ]);
             
             echo json_encode(["status" => "sucesso", "dados" => "Rascunho salvo com sucesso!"]);

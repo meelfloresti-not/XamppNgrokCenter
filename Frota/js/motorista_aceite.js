@@ -66,7 +66,6 @@ async function carregarEntregas(silencioso = false) {
     if (!silencioso) {
         switchView('viewLista');
         document.getElementById('listaEntregas').innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-sec)">Carregando...</div>';
-        document.getElementById('btnChegueiBase').style.display = 'none';
     }
 
     try {
