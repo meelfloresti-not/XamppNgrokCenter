@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowFlora – Painel de Pedidos</title>
+  <meta name="description" content="Painel de gerenciamento de pedidos da FlowFlora - Floricultura">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================
+       LOGIN SCREEN
+       ========================================= */
+    .login-overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
+      z-index: 1000;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+    .login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .login-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 48px 40px;
+      width: 420px; max-width: 92vw;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      text-align: center;
+      animation: fadeInUp 0.6s ease;
+    }
+    .login-card h1 {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #818cf8, #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 8px;
+    }
+    .login-card p { color: #94a3b8; margin-bottom: 32px; font-size: 0.9rem; }
+    .login-card .emoji { font-size: 3rem; margin-bottom: 16px; display: block; }
+    .login-field {
+      width: 100%; padding: 14px 18px; margin-bottom: 16px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; color: #e0e0e0; font-size: 0.95rem;
+      font-family: inherit; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .login-field::placeholder { color: #64748b; }
+    .login-field:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(129,140,248,0.15);
+    }
+    .login-btn {
+      width: 100%; padding: 14px; margin-top: 8px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border: none; border-radius: 12px; color: #fff;
+      font-size: 1rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
+    }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
+    .login-btn:active { transform: translateY(0); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .login-error {
+      color: #f87171; font-size: 0.85rem; margin-top: 12px;
+      min-height: 20px;
+    }
+
+    /* =========================================
+       MAIN APPLICATION
+       ========================================= */
+    .app { opacity: 0; transition: opacity 0.5s; }
+    .app.visible { opacity: 1; }
+
+    /* Header */
+    .header {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header h1 {
+      font-size: 1.4rem; font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #818cf8, #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-logo { font-size: 1.6rem; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .refresh-btn, .logout-btn {
+      padding: 8px 16px; border-radius: 10px; border: none;
+      font-size: 0.85rem; font-weight: 500; font-family: inherit;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .refresh-btn {
+      background: rgba(129,140,248,0.15); color: #a5b4fc;
+      border: 1px solid rgba(129,140,248,0.2);
+    }
+    .refresh-btn:hover { background: rgba(129,140,248,0.25); }
+    .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+    .logout-btn {
+      background: rgba(248,113,113,0.12); color: #fca5a5;
+      border: 1px solid rgba(248,113,113,0.2);
+    }
+    .logout-btn:hover { background: rgba(248,113,113,0.22); }
+    .auto-refresh-tag {
+      font-size: 0.7rem; color: #64748b; padding: 4px 8px;
+      background: rgba(255,255,255,0.04); border-radius: 6px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; padding: 24px 32px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px 24px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .stat-card .stat-label { font-size: 0.78rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 800; margin-top: 4px; }
+    .stat-card.total .stat-value { color: #a5b4fc; }
+    .stat-card.pending .stat-value { color: #fbbf24; }
+    .stat-card.progress .stat-value { color: #60a5fa; }
+    .stat-card.done .stat-value { color: #34d399; }
+
+    /* Filters Bar */
+    .filters-bar {
+      padding: 0 32px 16px;
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    }
+    .search-box {
+      flex: 1 1 280px; min-width: 200px; padding: 12px 18px 12px 42px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: #e0e0e0; font-size: 0.9rem;
+      font-family: inherit; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%2364748b' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 14px center;
+    }
+    .search-box::placeholder { color: #64748b; }
+    .search-box:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.12); }
+    .filter-select {
+      padding: 12px 16px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: #e0e0e0; font-size: 0.85rem; font-family: inherit;
+      outline: none; cursor: pointer; min-width: 160px;
+      transition: border-color 0.3s;
+    }
+    .filter-select:focus { border-color: #818cf8; }
+    .filter-select option { background: #1e1b4b; color: #e0e0e0; }
+    .date-input {
+      padding: 10px 14px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: #e0e0e0; font-size: 0.85rem; font-family: inherit;
+      outline: none; transition: border-color 0.3s;
+    }
+    .date-input:focus { border-color: #818cf8; }
+    .clear-filters-btn {
+      padding: 10px 16px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: #94a3b8; font-size: 0.85rem; font-family: inherit;
+      cursor: pointer; transition: all 0.3s; white-space: nowrap;
+    }
+    .clear-filters-btn:hover { background: rgba(255,255,255,0.1); color: #e0e0e0; }
+    .results-count {
+      font-size: 0.8rem; color: #64748b; padding: 0 32px 8px;
+    }
+
+    /* =========================================
+       TABLE (Desktop)
+       ========================================= */
+    .table-container {
+      padding: 0 32px 32px;
+    }
+    .table-wrapper {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .data-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .data-table thead { position: sticky; top: 0; z-index: 10; }
+    .data-table th {
+      padding: 14px 16px; text-align: left;
+      background: rgba(99,102,241,0.12);
+      color: #a5b4fc; font-weight: 600; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer; user-select: none; white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .data-table th:hover { background: rgba(99,102,241,0.2); }
+    .data-table th .sort-icon { margin-left: 4px; opacity: 0.4; font-size: 0.7rem; }
+    .data-table th.sorted-asc .sort-icon,
+    .data-table th.sorted-desc .sort-icon { opacity: 1; color: #818cf8; }
+    .data-table td {
+      padding: 12px 16px; font-size: 0.88rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #cbd5e1; max-width: 220px;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .data-table tr { transition: background 0.2s; }
+    .data-table tbody tr:hover { background: rgba(129,140,248,0.06); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .status-badge.pendente, .status-badge.aguardando { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .status-badge.em-andamento, .status-badge.producao, .status-badge.em-producao { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .status-badge.entregue, .status-badge.concluido, .status-badge.finalizado { background: rgba(52,211,153,0.15); color: #34d399; }
+    .status-badge.cancelado { background: rgba(248,113,113,0.15); color: #f87171; }
+    .status-badge.default { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    /* OS Number */
+    .os-number { font-weight: 700; color: #a5b4fc; }
+
+    /* Products pill */
+    .product-pill {
+      display: inline-block; padding: 2px 8px; margin: 2px;
+      background: rgba(129,140,248,0.1); border-radius: 6px;
+      font-size: 0.78rem; color: #c4b5fd;
+    }
+
+    /* =========================================
+       CARDS (Mobile)
+       ========================================= */
+    .cards-container {
+      display: none; padding: 0 16px 32px;
+    }
+    .order-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px;
+      margin-bottom: 12px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .order-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .order-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .order-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .order-card-field { }
+    .order-card-field .field-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+    .order-card-field .field-value { font-size: 0.88rem; color: #cbd5e1; margin-top: 2px; }
+    .order-card-field.full-width { grid-column: 1 / -1; }
+
+    /* =========================================
+       EMPTY STATE & LOADING
+       ========================================= */
+    .empty-state {
+      text-align: center; padding: 64px 20px; color: #64748b;
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.2rem; color: #94a3b8; margin-bottom: 8px; }
+
+    .loading-spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top: 2px solid #818cf8;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    .skeleton-row td {
+      position: relative; overflow: hidden;
+    }
+    .skeleton-bar {
+      height: 14px; border-radius: 6px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      width: 80%;
+    }
+
+    /* =========================================
+       DETAIL MODAL
+       ========================================= */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: all 0.3s;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-card {
+      background: rgba(30,27,75,0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 32px;
+      width: 560px; max-width: 94vw; max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      animation: fadeInUp 0.3s ease;
+    }
+    .modal-card h2 {
+      font-size: 1.3rem; font-weight: 700; color: #a5b4fc; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .modal-field .value { font-size: 0.95rem; color: #e0e0e0; line-height: 1.5; }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: rgba(255,255,255,0.08); border: none;
+      color: #94a3b8; font-size: 1.2rem; width: 36px; height: 36px;
+      border-radius: 50%; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: rgba(248,113,113,0.2); color: #f87171; }
+
+    /* =========================================
+       ANIMATIONS
+       ========================================= */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .fade-in-row { animation: fadeInUp 0.4s ease forwards; opacity: 0; }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 900px) {
+      .table-container { display: none; }
+      .cards-container { display: block; }
+      .header { padding: 12px 16px; }
+      .stats-grid { padding: 16px; grid-template-columns: 1fr 1fr; }
+      .filters-bar { padding: 0 16px 12px; }
+      .results-count { padding: 0 16px 8px; }
+    }
+    @media (max-width: 500px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.1rem; }
+      .order-card-body { grid-template-columns: 1fr; }
+      .login-card { padding: 32px 24px; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(129,140,248,0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(129,140,248,0.4); }
+
+    /* Export button */
+    .export-btn {
+      padding: 8px 16px; border-radius: 10px;
+      background: rgba(52,211,153,0.12); color: #6ee7b7;
+      border: 1px solid rgba(52,211,153,0.2);
+      font-size: 0.85rem; font-weight: 500; font-family: inherit;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .export-btn:hover { background: rgba(52,211,153,0.22); }
+  </style>
+</head>
+<body>
+
+  <!-- ============ LOGIN OVERLAY ============ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <span class="emoji">🌸</span>
+      <h1>FlowFlora</h1>
+      <p>Faça login para acessar o painel de pedidos</p>
+      <form id="loginForm">
+        <input class="login-field" type="email" id="loginEmail" placeholder="E-mail" required autocomplete="email">
+        <input class="login-field" type="password" id="loginPassword" placeholder="Senha" required autocomplete="current-password">
+        <button class="login-btn" type="submit" id="loginBtn">Entrar</button>
+      </form>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- ============ DETAIL MODAL ============ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card" style="position: relative;">
+      <button class="modal-close" id="modalClose">✕</button>
+      <h2 id="modalTitle">📋 Detalhes do Pedido</h2>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div class="app" id="mainApp">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <span class="header-logo">🌺</span>
+        <h1>FlowFlora – Painel de Pedidos</h1>
+      </div>
+      <div class="header-right">
+        <span class="auto-refresh-tag" id="autoRefreshTag">Auto-refresh: 60s</span>
+        <button class="refresh-btn" id="refreshBtn" onclick="fetchData()">🔄 Atualizar</button>
+        <button class="export-btn" id="exportBtn" onclick="exportToCSV()">📥 Exportar CSV</button>
+        <button class="logout-btn" onclick="doLogout()">🚪 Sair</button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card total">
+        <div class="stat-label">Total de Pedidos</div>
+        <div class="stat-value" id="statTotal">-</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-label">Pendentes</div>
+        <div class="stat-value" id="statPending">-</div>
+      </div>
+      <div class="stat-card progress">
+        <div class="stat-label">Em Produção</div>
+        <div class="stat-value" id="statProgress">-</div>
+      </div>
+      <div class="stat-card done">
+        <div class="stat-label">Entregues</div>
+        <div class="stat-value" id="statDone">-</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <input type="text" class="search-box" id="searchBox" placeholder="Buscar por OS, falecido, funerária, local...">
+      <select class="filter-select" id="filterStatus">
+        <option value="">Todos os Status</option>
+      </select>
+      <select class="filter-select" id="filterTipo">
+        <option value="">Todos os Tipos</option>
+      </select>
+      <input type="date" class="date-input" id="dateFrom" title="Data início">
+      <input type="date" class="date-input" id="dateTo" title="Data fim">
+      <button class="clear-filters-btn" onclick="clearFilters()">✕ Limpar Filtros</button>
+    </div>
+    <div class="results-count" id="resultsCount"></div>
+
+    <!-- Table (Desktop) -->
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th data-key="osNumber" onclick="sortBy('osNumber')">Nº da OS <span class="sort-icon">⇅</span></th>
+              <th data-key="falecido" onclick="sortBy('falecido')">Falecido <span class="sort-icon">⇅</span></th>
+              <th data-key="funeraria" onclick="sortBy('funeraria')">Funerária <span class="sort-icon">⇅</span></th>
+              <th data-key="tipo" onclick="sortBy('tipo')">Tipo <span class="sort-icon">⇅</span></th>
+              <th data-key="produtos" onclick="sortBy('produtos')">Produtos <span class="sort-icon">⇅</span></th>
+              <th data-key="dataEntrega" onclick="sortBy('dataEntrega')">Data/Hora Entrega <span class="sort-icon">⇅</span></th>
+              <th data-key="localEntrega" onclick="sortBy('localEntrega')">Local de Entrega <span class="sort-icon">⇅</span></th>
+              <th data-key="observacoes" onclick="sortBy('observacoes')">Observações <span class="sort-icon">⇅</span></th>
+              <th data-key="status" onclick="sortBy('status')">Status <span class="sort-icon">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cards (Mobile) -->
+    <div class="cards-container" id="cardsContainer"></div>
+  </div>
+
+  <script>
+    // =========================================
+    //   STATE
+    // =========================================
+    const API_BASE = 'https://api.flowflora.consolare.com.br';
+    let authToken = '';
+    let allOrders = [];
+    let filteredOrders = [];
+    let sortState = { key: '', dir: 'asc' };
+    let refreshInterval = null;
+
+    // =========================================
+    //   LOGIN
+    // =========================================
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginError');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Entrando...';
+      err.textContent = '';
+
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) throw new Error('Credenciais inválidas');
+
+        const data = await res.json();
+        authToken = data.token || data.accessToken || data.access_token || '';
+
+        if (!authToken) {
+          // Try to extract token from nested response
+          if (data.data && data.data.token) authToken = data.data.token;
+          else if (data.data && data.data.accessToken) authToken = data.data.accessToken;
+          else throw new Error('Token não encontrado na resposta');
+        }
+
+        sessionStorage.setItem('ff_token', authToken);
+        showApp();
+        fetchData();
+        startAutoRefresh();
+
+      } catch (error) {
+        err.textContent = error.message || 'Erro ao fazer login';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+
+    // Check for existing token
+    (function checkSession() {
+      const stored = sessionStorage.getItem('ff_token');
+      if (stored) {
+        authToken = stored;
+        showApp();
+        fetchData();
+        startAutoRefresh();
+      }
+    })();
+
+    function showApp() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('mainApp').classList.add('visible');
+    }
+
+    function doLogout() {
+      authToken = '';
+      sessionStorage.removeItem('ff_token');
+      clearInterval(refreshInterval);
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      document.getElementById('mainApp').classList.remove('visible');
+    }
+
+    // =========================================
+    //   FETCH DATA
+    // =========================================
+    async function fetchData() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="loading-spinner"></span> Carregando...';
+      showSkeleton();
+
+      try {
+        const res = await fetch(`${API_BASE}/floriculture-requests`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Accept': '*/*',
+          }
+        });
+
+        if (res.status === 401) {
+          doLogout();
+          document.getElementById('loginError').textContent = 'Sessão expirada. Faça login novamente.';
+          return;
+        }
+
+        if (!res.ok) throw new Error(`Erro ${res.status}`);
+
+        const data = await res.json();
+        allOrders = normalizeData(data);
+        populateFilterOptions();
+        applyFilters();
+
+      } catch (error) {
+        console.error('Fetch error:', error);
+        document.getElementById('tableBody').innerHTML = `<tr><td colspan="9" class="empty-state"><div class="emoji">⚠️</div><h3>Erro ao carregar dados</h3><p>${error.message}</p></td></tr>`;
+      } finally {
+        btn.classList.remove('loading');
+        btn.innerHTML = '🔄 Atualizar';
+      }
+    }
+
+    function showSkeleton() {
+      const tbody = document.getElementById('tableBody');
+      let html = '';
+      for (let i = 0; i < 6; i++) {
+        html += '<tr class="skeleton-row">';
+        for (let j = 0; j < 9; j++) {
+          html += '<td><div class="skeleton-bar" style="width:' + (50 + Math.random()*40) + '%"></div></td>';
+        }
+        html += '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    // =========================================
+    //   NORMALIZE API DATA
+    // =========================================
+    function normalizeData(raw) {
+      // Handle both array and { data: [...] } responses
+      let items = Array.isArray(raw) ? raw : (raw.data || raw.results || raw.items || []);
+      if (!Array.isArray(items)) items = [items];
+
+      return items.map((item, idx) => {
+        // Flexibly extract fields — adjust keys if the API uses different names
+        return {
+          id: item.id || item._id || idx,
+          osNumber: item.osNumber || item.os_number || item.os || item.serviceOrderNumber || item.numero_os || item.number || '',
+          falecido: item.falecido || item.deceased || item.deceasedName || item.nome_falecido || item.deceased_name || '',
+          funeraria: item.funeraria || item.funeralHome || item.funeral_home || item.funeraria_nome || item.funeralHomeName || '',
+          tipo: item.tipo || item.type || item.requestType || item.request_type || '',
+          produtos: item.produtos || item.products || item.product || item.items || '',
+          dataEntrega: item.dataEntrega || item.deliveryDate || item.delivery_date || item.data_entrega || item.deliveryDateTime || '',
+          localEntrega: item.localEntrega || item.deliveryLocation || item.delivery_location || item.local_entrega || item.deliveryAddress || '',
+          observacoes: item.observacoes || item.observations || item.notes || item.obs || item.observation || '',
+          status: item.status || item.state || '',
+          chat: item.chat || item.messages || '',
+          _raw: item
+        };
+      });
+    }
+
+    // =========================================
+    //   DISPLAY HELPERS
+    // =========================================
+    function getStatusClass(status) {
+      if (!status) return 'default';
+      const s = status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+      if (s.includes('penden') || s.includes('aguardand')) return 'pendente';
+      if (s.includes('andamento') || s.includes('producao') || s.includes('produção') || s.includes('em-prod')) return 'em-andamento';
+      if (s.includes('entreg') || s.includes('conclu') || s.includes('finaliz')) return 'entregue';
+      if (s.includes('cancel')) return 'cancelado';
+      return 'default';
+    }
+
+    function formatProducts(prods) {
+      if (!prods) return '-';
+      if (typeof prods === 'string') return prods;
+      if (Array.isArray(prods)) {
+        return prods.map(p => {
+          if (typeof p === 'string') return p;
+          return p.name || p.productName || p.product_name || p.description || JSON.stringify(p);
+        }).join(', ');
+      }
+      return String(prods);
+    }
+
+    function formatDate(d) {
+      if (!d) return '-';
+      try {
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return String(d);
+        return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      } catch { return String(d); }
+    }
+
+    function truncate(str, len = 40) {
+      if (!str) return '-';
+      str = String(str);
+      return str.length > len ? str.substring(0, len) + '…' : str;
+    }
+
+    // =========================================
+    //   RENDERING
+    // =========================================
+    function renderTable(orders) {
+      const tbody = document.getElementById('tableBody');
+      const cardsEl = document.getElementById('cardsContainer');
+
+      if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 48px 20px; color:#64748b;">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📭</div>
+          <h3 style="color:#94a3b8; margin-bottom:4px;">Nenhum pedido encontrado</h3>
+          <p style="font-size:0.85rem;">Tente ajustar os filtros de busca</p>
+        </td></tr>`;
+        cardsEl.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><h3>Nenhum pedido encontrado</h3></div>`;
+        return;
+      }
+
+      // Table rows
+      let tableHtml = '';
+      orders.forEach((o, i) => {
+        const statusClass = getStatusClass(o.status);
+        tableHtml += `
+          <tr class="fade-in-row" style="animation-delay:${i * 30}ms" onclick="showDetail(${o.id})" title="Clique para ver detalhes" style="cursor:pointer">
+            <td><span class="os-number">${o.osNumber || '-'}</span></td>
+            <td>${truncate(o.falecido)}</td>
+            <td>${truncate(o.funeraria)}</td>
+            <td>${truncate(o.tipo, 20)}</td>
+            <td>${truncate(formatProducts(o.produtos), 30)}</td>
+            <td>${formatDate(o.dataEntrega)}</td>
+            <td>${truncate(o.localEntrega, 30)}</td>
+            <td>${truncate(o.observacoes, 30)}</td>
+            <td><span class="status-badge ${statusClass}">${o.status || '-'}</span></td>
+          </tr>`;
+      });
+      tbody.innerHTML = tableHtml;
+
+      // Cards
+      let cardsHtml = '';
+      orders.forEach((o, i) => {
+        const statusClass = getStatusClass(o.status);
+        cardsHtml += `
+          <div class="order-card fade-in-row" style="animation-delay:${i * 30}ms" onclick="showDetail(${o.id})">
+            <div class="order-card-header">
+              <span class="os-number" style="font-size:1.1rem;">OS #${o.osNumber || '-'}</span>
+              <span class="status-badge ${statusClass}">${o.status || '-'}</span>
+            </div>
+            <div class="order-card-body">
+              <div class="order-card-field"><div class="field-label">Falecido</div><div class="field-value">${o.falecido || '-'}</div></div>
+              <div class="order-card-field"><div class="field-label">Funerária</div><div class="field-value">${o.funeraria || '-'}</div></div>
+              <div class="order-card-field"><div class="field-label">Tipo</div><div class="field-value">${o.tipo || '-'}</div></div>
+              <div class="order-card-field"><div class="field-label">Entrega</div><div class="field-value">${formatDate(o.dataEntrega)}</div></div>
+              <div class="order-card-field full-width"><div class="field-label">Local</div><div class="field-value">${o.localEntrega || '-'}</div></div>
+              <div class="order-card-field full-width"><div class="field-label">Produtos</div><div class="field-value">${formatProducts(o.produtos)}</div></div>
+            </div>
+          </div>`;
+      });
+      cardsEl.innerHTML = cardsHtml;
+    }
+
+    function updateStats(orders) {
+      document.getElementById('statTotal').textContent = orders.length;
+      const pending = orders.filter(o => {
+        const cls = getStatusClass(o.status);
+        return cls === 'pendente';
+      }).length;
+      const inProg = orders.filter(o => {
+        const cls = getStatusClass(o.status);
+        return cls === 'em-andamento';
+      }).length;
+      const done = orders.filter(o => {
+        const cls = getStatusClass(o.status);
+        return cls === 'entregue';
+      }).length;
+      document.getElementById('statPending').textContent = pending;
+      document.getElementById('statProgress').textContent = inProg;
+      document.getElementById('statDone').textContent = done;
+    }
+
+    // =========================================
+    //   FILTERS
+    // =========================================
+    function populateFilterOptions() {
+      const statuses = [...new Set(allOrders.map(o => o.status).filter(Boolean))].sort();
+      const tipos = [...new Set(allOrders.map(o => o.tipo).filter(Boolean))].sort();
+
+      const statusSelect = document.getElementById('filterStatus');
+      const tipoSelect = document.getElementById('filterTipo');
+
+      // Keep current selection
+      const curStatus = statusSelect.value;
+      const curTipo = tipoSelect.value;
+
+      statusSelect.innerHTML = '<option value="">Todos os Status</option>';
+      statuses.forEach(s => statusSelect.innerHTML += `<option value="${s}">${s}</option>`);
+      statusSelect.value = curStatus;
+
+      tipoSelect.innerHTML = '<option value="">Todos os Tipos</option>';
+      tipos.forEach(t => tipoSelect.innerHTML += `<option value="${t}">${t}</option>`);
+      tipoSelect.value = curTipo;
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchBox').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const tipoFilter = document.getElementById('filterTipo').value;
+      const dateFrom = document.getElementById('dateFrom').value;
+      const dateTo = document.getElementById('dateTo').value;
+
+      filteredOrders = allOrders.filter(o => {
+        // Text search
+        if (search) {
+          const searchable = [o.osNumber, o.falecido, o.funeraria, o.tipo, formatProducts(o.produtos),
+            o.localEntrega, o.observacoes, o.status].join(' ').toLowerCase();
+          if (!searchable.includes(search)) return false;
+        }
+        // Status filter
+        if (statusFilter && o.status !== statusFilter) return false;
+        // Tipo filter
+        if (tipoFilter && o.tipo !== tipoFilter) return false;
+        // Date range
+        if (dateFrom || dateTo) {
+          try {
+            const d = new Date(o.dataEntrega);
+            if (isNaN(d.getTime())) return true; // keep if date unparseable
+            if (dateFrom && d < new Date(dateFrom)) return false;
+            if (dateTo) {
+              const end = new Date(dateTo);
+              end.setHours(23, 59, 59, 999);
+              if (d > end) return false;
+            }
+          } catch { }
+        }
+        return true;
+      });
+
+      // Apply sort
+      if (sortState.key) {
+        doSort(filteredOrders, sortState.key, sortState.dir);
+      }
+
+      renderTable(filteredOrders);
+      updateStats(filteredOrders);
+      document.getElementById('resultsCount').textContent =
+        `Exibindo ${filteredOrders.length} de ${allOrders.length} pedido(s)`;
+    }
+
+    function clearFilters() {
+      document.getElementById('searchBox').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('filterTipo').value = '';
+      document.getElementById('dateFrom').value = '';
+      document.getElementById('dateTo').value = '';
+      sortState = { key: '', dir: 'asc' };
+      clearSortIndicators();
+      applyFilters();
+    }
+
+    // Attach filter events
+    ['searchBox'].forEach(id => {
+      document.getElementById(id).addEventListener('input', debounce(applyFilters, 250));
+    });
+    ['filterStatus', 'filterTipo', 'dateFrom', 'dateTo'].forEach(id => {
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+
+    function debounce(fn, ms) {
+      let t;
+      return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+    }
+
+    // =========================================
+    //   SORTING
+    // =========================================
+    function sortBy(key) {
+      if (sortState.key === key) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.key = key;
+        sortState.dir = 'asc';
+      }
+      updateSortIndicators(key, sortState.dir);
+      applyFilters();
+    }
+
+    function doSort(arr, key, dir) {
+      arr.sort((a, b) => {
+        let va = a[key] || '';
+        let vb = b[key] || '';
+        if (key === 'dataEntrega') {
+          va = new Date(va).getTime() || 0;
+          vb = new Date(vb).getTime() || 0;
+          return dir === 'asc' ? va - vb : vb - va;
+        }
+        if (key === 'osNumber') {
+          const na = parseInt(va) || 0;
+          const nb = parseInt(vb) || 0;
+          if (na !== nb) return dir === 'asc' ? na - nb : nb - na;
+        }
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        if (va < vb) return dir === 'asc' ? -1 : 1;
+        if (va > vb) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function updateSortIndicators(key, dir) {
+      clearSortIndicators();
+      const th = document.querySelector(`th[data-key="${key}"]`);
+      if (th) {
+        th.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        th.querySelector('.sort-icon').textContent = dir === 'asc' ? '↑' : '↓';
+      }
+    }
+
+    function clearSortIndicators() {
+      document.querySelectorAll('.data-table th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        const icon = th.querySelector('.sort-icon');
+        if (icon) icon.textContent = '⇅';
+      });
+    }
+
+    // =========================================
+    //   DETAIL MODAL
+    // =========================================
+    function showDetail(id) {
+      const order = allOrders.find(o => o.id === id);
+      if (!order) return;
+
+      document.getElementById('modalTitle').innerHTML = `📋 Pedido OS #${order.osNumber || id}`;
+      const fields = [
+        { label: 'Nº da OS', value: order.osNumber },
+        { label: 'Falecido', value: order.falecido },
+        { label: 'Funerária', value: order.funeraria },
+        { label: 'Tipo', value: order.tipo },
+        { label: 'Produtos', value: formatProducts(order.produtos) },
+        { label: 'Data/Hora de Entrega', value: formatDate(order.dataEntrega) },
+        { label: 'Local de Entrega', value: order.localEntrega },
+        { label: 'Observações', value: order.observacoes },
+        { label: 'Status', value: order.status },
+      ];
+
+      let html = '';
+      fields.forEach(f => {
+        html += `<div class="modal-field">
+          <div class="label">${f.label}</div>
+          <div class="value">${f.value || '-'}</div>
+        </div>`;
+      });
+
+      // Also show all raw fields for anything we might have missed
+      const rawKeys = Object.keys(order._raw || {});
+      const knownKeys = ['id', '_id', 'osNumber', 'os_number', 'os', 'serviceOrderNumber', 'falecido', 'deceased',
+        'funeraria', 'funeralHome', 'tipo', 'type', 'produtos', 'products', 'dataEntrega', 'deliveryDate',
+        'localEntrega', 'deliveryLocation', 'observacoes', 'observations', 'status', 'chat'];
+      const extra = rawKeys.filter(k => !knownKeys.includes(k));
+      if (extra.length) {
+        html += '<hr style="border-color: rgba(255,255,255,0.06); margin: 16px 0;">';
+        html += '<div style="font-size:0.75rem; color:#64748b; margin-bottom:8px;">CAMPOS ADICIONAIS</div>';
+        extra.forEach(k => {
+          let v = order._raw[k];
+          if (typeof v === 'object') v = JSON.stringify(v, null, 2);
+          html += `<div class="modal-field">
+            <div class="label">${k}</div>
+            <div class="value" style="word-break:break-all;">${v ?? '-'}</div>
+          </div>`;
+        });
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('modalOverlay').classList.remove('active');
+    });
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('active');
+    });
+
+    // =========================================
+    //   AUTO REFRESH
+    // =========================================
+    function startAutoRefresh() {
+      clearInterval(refreshInterval);
+      refreshInterval = setInterval(fetchData, 60000);
+    }
+
+    // =========================================
+    //   EXPORT CSV
+    // =========================================
+    function exportToCSV() {
+      if (!filteredOrders.length) return;
+
+      const headers = ['Nº da OS', 'Falecido', 'Funerária', 'Tipo', 'Produtos', 'Data/Hora Entrega', 'Local de Entrega', 'Observações', 'Status'];
+      const rows = filteredOrders.map(o => [
+        o.osNumber, o.falecido, o.funeraria, o.tipo,
+        formatProducts(o.produtos), formatDate(o.dataEntrega),
+        o.localEntrega, o.observacoes, o.status
+      ]);
+
+      let csv = '\uFEFF'; // BOM for Excel UTF-8
+      csv += headers.map(h => `"${h}"`).join(';') + '\n';
+      rows.forEach(r => {
+        csv += r.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(';') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pedidos_flowflora_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('modalOverlay').classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

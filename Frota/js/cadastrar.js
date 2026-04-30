@@ -64,6 +64,11 @@ export function initCadastrar() {
       }
     });
   }
+
+  const btnBuscarFlowFlora = document.getElementById('btnBuscarFlowFlora');
+  if (btnBuscarFlowFlora) {
+    btnBuscarFlowFlora.addEventListener('click', buscarFlowFlora);
+  }
 }
 
 function gerarCamposItens() {
@@ -260,7 +265,7 @@ async function salvarPedido() {
 }
 
 function limparFormCadastro() {
-  ['cad_pedido', 'cad_cliente', 'cad_falecido', 'cad_data_entrega', 'cad_hora_entrega', 'cad_local_entrega', 'cad_frases_coroas', 'cad_observacao'].forEach(id => {
+  ['cad_pedido', 'cad_cliente', 'cad_falecido', 'cad_data_entrega', 'cad_hora_entrega', 'cad_local_entrega', 'cad_frases_coroas', 'cad_observacao', 'cad_busca_os'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -273,4 +278,219 @@ function limparFormCadastro() {
   if (btnItens) btnItens.value = '0';
   const cItens = document.getElementById('containerItens');
   if (cItens) cItens.innerHTML = '';
+}
+
+// ─── INTEGRAÇÃO FLOWFLORA ──────────────────────────────────────────────────────
+async function buscarFlowFlora() {
+  const osInput = document.getElementById('cad_busca_os');
+  const btn = document.getElementById('btnBuscarFlowFlora');
+  if (!osInput || !osInput.value.trim()) return showToast('Digite o Nº da OS para buscar.', 'error');
+  
+  const osNumber = osInput.value.trim();
+  btn.disabled = true;
+  btn.innerText = '⏳ Buscando...';
+
+  try {
+    let token = localStorage.getItem('ff_token_auto');
+    if (!token) {
+      const resLogin = await fetch('https://api.flowflora.consolare.com.br/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'atendimento@meelflores.com.br', password: 'Meel@2024' })
+      });
+      if (!resLogin.ok) throw new Error('Falha na autenticação automática.');
+      const dataLogin = await resLogin.json();
+      token = dataLogin.token || dataLogin.accessToken || (dataLogin.data && dataLogin.data.token);
+      if (token) localStorage.setItem('ff_token_auto', token);
+      else throw new Error('Token não retornado no login.');
+    }
+
+    // Tentar buscar na rota padrão
+    let resOs = await fetch('https://api.flowflora.consolare.com.br/floriculture-requests?limit=200', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': '*/*' }
+    });
+
+    if (resOs.status === 401) {
+      localStorage.removeItem('ff_token_auto');
+      btn.disabled = false;
+      return buscarFlowFlora(); // Retry
+    }
+
+    if (!resOs.ok) throw new Error('Erro ao buscar pedidos na FlowFlora.');
+    
+    let dataOs = await resOs.json();
+    console.log("Resposta FlowFlora (Padrão):", dataOs);
+    
+    let items = [];
+    if (Array.isArray(dataOs)) {
+      items = dataOs;
+    } else if (dataOs && typeof dataOs === 'object') {
+      items = dataOs.data || dataOs.results || dataOs.items || dataOs.content || dataOs.records || dataOs.list || [];
+      if (!Array.isArray(items) || items.length === 0) {
+        // Procurar o primeiro array dentro do objeto
+        for (const key of Object.keys(dataOs)) {
+          if (Array.isArray(dataOs[key]) && dataOs[key].length > 0) {
+            items = dataOs[key];
+            break;
+          }
+        }
+      }
+    }
+    if (!Array.isArray(items)) items = [];
+    console.log("Itens extraídos da API:", items.length);
+
+    let osItems = items.filter(item => {
+      const num = item.osNumber || item.os_number || item.os || item.serviceOrderNumber || item.numero_os || item.number || item.id || '';
+      if (String(num) === osNumber) return true;
+      return JSON.stringify(item).includes('"' + osNumber + '"') || JSON.stringify(item).includes(':' + osNumber + ',') || JSON.stringify(item).includes(':' + osNumber + '}');
+    });
+
+    if (osItems.length === 0) {
+      console.log('OS não encontrada na lista inicial. Tentando busca específica...');
+      const resBusca = await fetch(`https://api.flowflora.consolare.com.br/floriculture-requests?search=${osNumber}&osNumber=${osNumber}&size=500`, {
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': '*/*' }
+      });
+      if (resBusca.ok) {
+        let dataBusca = await resBusca.json();
+        let itemsBusca = [];
+        if (Array.isArray(dataBusca)) itemsBusca = dataBusca;
+        else if (dataBusca && typeof dataBusca === 'object') {
+          itemsBusca = dataBusca.data || dataBusca.results || dataBusca.items || dataBusca.content || dataBusca.records || [];
+          if (!Array.isArray(itemsBusca) || itemsBusca.length === 0) {
+            for (const key of Object.keys(dataBusca)) {
+              if (Array.isArray(dataBusca[key])) { itemsBusca = dataBusca[key]; break; }
+            }
+          }
+        }
+        if (Array.isArray(itemsBusca)) {
+          osItems = itemsBusca.filter(item => JSON.stringify(item).includes(osNumber));
+        }
+      }
+    }
+
+    if (osItems.length === 0) {
+      throw new Error(`OS nº ${osNumber} não encontrada.`);
+    }
+
+    console.log("Itens encontrados para esta OS:", osItems);
+
+    // Normalizar dados da OS encontrada
+    const baseItem = osItems[0];
+    const item = {
+      falecido: baseItem.os_falecido || baseItem.falecido || baseItem.deceased || baseItem.deceasedName || baseItem.nome_falecido || '',
+      funeraria: baseItem.os_funeraria || baseItem.funeraria || baseItem.funeralHome || baseItem.funeral_home || baseItem.funeraria_nome || baseItem.funeralHomeName || '',
+      tipo: baseItem.request_type || baseItem.tipo || baseItem.type || baseItem.requestType || baseItem.request_type || '',
+      produtos: baseItem.products || baseItem.produtos || baseItem.product || baseItem.items || '',
+      dataEntrega: baseItem.delivery_date || baseItem.dataEntrega || baseItem.deliveryDate || baseItem.data_entrega || baseItem.deliveryDateTime || '',
+      horaEntrega: baseItem.delivery_time || '',
+      localEntrega: baseItem.delivery_location || baseItem.localEntrega || baseItem.deliveryLocation || baseItem.delivery_location || baseItem.local_entrega || baseItem.deliveryAddress || '',
+      observacoes: baseItem.observations || baseItem.observacoes || baseItem.notes || baseItem.obs || baseItem.observation || ''
+    };
+
+    // Juntar produtos e frases de todas as linhas
+    let allParsedProds = [];
+    let allFrases = [];
+    osItems.forEach(row => {
+      let prods = row.products || row.produtos || row.product || row.items || '';
+      let rowTipo = row.request_type || row.tipo || row.type || row.requestType || row.request_type || 'Outros';
+      
+      let parsed = [];
+      if (typeof prods === 'string') {
+        parsed = prods.split(',').map(s => s.trim()).filter(Boolean);
+        if (parsed.length === 0 && prods) parsed = [prods];
+      } else if (Array.isArray(prods)) {
+        parsed = prods.map(p => {
+          if (typeof p === 'string') return p;
+          if (p.frase) allFrases.push(p.frase);
+          return p.product_type || p.name || p.productName || p.product_name || p.description || JSON.stringify(p);
+        });
+      }
+      
+      // Se não tem produto descrito mas tem Tipo (ex: Tipo: Ornamentação, Prod: vazio)
+      if (parsed.length === 0) {
+        parsed = [rowTipo];
+      }
+      
+      allParsedProds.push(...parsed);
+    });
+
+    // Preencher campos
+    document.getElementById('cad_pedido').value = osNumber;
+    document.getElementById('cad_falecido').value = item.falecido;
+    document.getElementById('cad_local_entrega').value = item.localEntrega;
+
+    // Data e Hora (Evitando bug de fuso horário)
+    if (item.dataEntrega) {
+      document.getElementById('cad_data_entrega').value = item.dataEntrega.split('T')[0];
+    }
+    if (item.horaEntrega) {
+      document.getElementById('cad_hora_entrega').value = item.horaEntrega.trim().substring(0, 5);
+    }
+    
+    // Frases das coroas
+    if (allFrases.length > 0) {
+      document.getElementById('cad_frases_coroas').value = allFrases.join('\n\n');
+    }
+
+    const fStr = item.funeraria.toUpperCase();
+    const selCliente = document.getElementById('cad_cliente_select');
+    const inpCliente = document.getElementById('cad_cliente');
+    if (fStr.includes('CONSOLARE')) selCliente.value = 'Consolare';
+    else if (fStr.includes('AVELINO')) selCliente.value = 'Avelino';
+    else if (fStr.includes('TATUAPÉ') || fStr.includes('TATUAPE')) selCliente.value = 'Tatuapé';
+    else if (fStr.includes('ANJO LUZ')) selCliente.value = 'Anjo Luz';
+    else {
+      selCliente.value = 'Outra';
+      inpCliente.style.display = 'block';
+      inpCliente.value = item.funeraria;
+    }
+
+    let obsStr = item.observacoes || '';
+    
+    let numItens = Math.min(Math.max(allParsedProds.length, 1), 10);
+    const cadNumItens = document.getElementById('cad_numItens');
+    cadNumItens.value = numItens;
+    cadNumItens.dispatchEvent(new Event('change'));
+
+    setTimeout(() => {
+      allParsedProds.forEach((prodStr, idx) => {
+        if (idx >= 10) return;
+        const i = idx + 1;
+        const sel = document.getElementById('tipo_' + i);
+        const qtd = document.getElementById('qtd_' + i);
+        if (!sel) return;
+
+        let matchedTipo = 'Outros';
+        const prodUpper = prodStr.toUpperCase();
+        for (const k of Object.keys(PRECOS)) {
+          if (prodUpper.includes(k.toUpperCase())) {
+            matchedTipo = k;
+            break;
+          }
+        }
+
+        if (matchedTipo === 'Outros' && (item.tipo || '').toUpperCase().includes('ORNAMENT')) {
+          matchedTipo = 'Ornamentação';
+        }
+
+        sel.value = matchedTipo;
+        sel.dispatchEvent(new Event('change'));
+        qtd.value = 1;
+
+        if (matchedTipo === 'Outros') {
+          obsStr += (obsStr ? '\n\n' : '') + '[API FlowFlora - Item ' + i + ']: ' + prodStr;
+        }
+      });
+
+      document.getElementById('cad_observacao').value = obsStr;
+      showToast('OS ' + osNumber + ' importada com sucesso!', 'success');
+    }, 50);
+
+  } catch (error) {
+    console.error(error);
+    showToast(error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerText = '🔍 Puxar Dados';
+  }
 }

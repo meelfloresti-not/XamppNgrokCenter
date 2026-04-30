@@ -2,6 +2,18 @@ export const views = {
   tabCadastrar: () => `
     <div class="form-card">
       <div class="form-title">Novo Pedido</div>
+
+      <!-- Integração FlowFlora -->
+      <div class="form-grid" style="background:rgba(99,102,241,0.05); padding:16px; border-radius:8px; margin-bottom:16px; border:1px solid rgba(99,102,241,0.2);">
+        <div class="form-group span2">
+          <label style="color:var(--primary, #a5b4fc); font-weight:600;">🌸 Buscar OS na FlowFlora</label>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <input type="text" id="cad_busca_os" placeholder="Nº da OS (ex: 99064)" style="flex:1;">
+            <button class="btn btn-primary" id="btnBuscarFlowFlora" type="button" style="width:auto; white-space:nowrap; background:var(--primary, #6366f1); border-color:var(--primary, #6366f1); color:#fff;">🔍 Puxar Dados</button>
+          </div>
+        </div>
+      </div>
+
       <div class="form-grid">
         <div class="form-group">
           <label>Data</label>
